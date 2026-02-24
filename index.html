@@ -2,32 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TUPPER WARS">
+<meta name="theme-color" content="#000011">
+<link rel="apple-touch-icon" id="ati-link" href="">
+<link rel="manifest" href="data:application/json,{%22name%22:%22TUPPER%20WARS%22,%22short_name%22:%22TUPPER%20WARS%22,%22start_url%22:%22./%22,%22display%22:%22fullscreen%22,%22background_color%22:%22%23000011%22,%22theme_color%22:%22%23ff6b35%22,%22icons%22:[{%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJgAAAA%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
 <title>TUPPER WARS</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;image-rendering:pixelated;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent!important;image-rendering:pixelated;outline:none!important;-webkit-user-select:none;user-select:none;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000011;font-family:'Press Start 2P',monospace;user-select:none;touch-action:none;}
+button,canvas,a,div,span,input{-webkit-tap-highlight-color:transparent!important;outline:none!important;-webkit-user-select:none;user-select:none;}
+button:focus,button:active,button:focus-visible,
+canvas:focus,canvas:active,
+.c-btn-cv,.c-btn-cv:focus,.c-btn-cv:active,.c-btn-cv:hover{
+  outline:none!important;box-shadow:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  background-color:rgba(0,0,14,0.55); /* prevent iOS blue flash */
+}
+button:focus,button:focus-visible{outline:none;box-shadow:none;}
+*:focus{outline:none;}
 
 /* ── MAIN LAYOUT ── */
-#app{display:flex;flex-direction:column;width:100vw;height:100vh;align-items:center;justify-content:center;}
-#game-col{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:relative;}
-#canvas-wrap{position:relative;flex-shrink:0;}
+#app{display:flex;flex-direction:column;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#000011;}
+#game-col{display:flex;flex-direction:column;width:100%;flex:1 1 0;min-height:0;overflow:hidden;}
+#canvas-wrap{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center;}
 canvas{display:block;touch-action:none;}
 #overlay-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',monospace;font-size:clamp(0.75rem,3vw,1.5rem);color:#fff;letter-spacing:2px;text-shadow:3px 3px 0 #000,0 0 18px #ff6b35;pointer-events:none;display:none;text-align:center;white-space:pre-line;line-height:1.6;background:rgba(0,0,0,0.55);padding:14px 22px;border:2px solid transparent;transition:color .3s,text-shadow .3s,border-color .3s,background .3s;}
 
+/* ── LEVEL INTRO SCREEN ── */
+#level-intro{position:fixed;top:0;left:0;width:100%;height:100%;z-index:600;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;pointer-events:none;}
+#level-intro.show{display:flex;}
+#level-intro-bg{position:absolute;inset:0;background:#000011;opacity:0;transition:opacity .3s;}
+#li-section{color:#a78bfa;font-size:clamp(0.28rem,1.5vw,0.5rem);letter-spacing:4px;text-align:center;position:relative;z-index:1;opacity:0;transform:translateY(-12px);transition:opacity .4s .1s,transform .4s .1s;}
+#li-level{color:#ffd166;font-size:clamp(0.7rem,4vw,1.6rem);letter-spacing:3px;text-align:center;position:relative;z-index:1;text-shadow:0 0 20px #ff6b3599;opacity:0;transform:scale(.8);transition:opacity .3s .25s,transform .3s .25s;}
+#li-name{color:#fff;font-size:clamp(0.4rem,2.5vw,0.9rem);letter-spacing:2px;text-align:center;position:relative;z-index:1;opacity:0;transition:opacity .3s .4s;}
+#li-countdown{color:#ff6b35;font-size:clamp(1.5rem,8vw,4rem);text-align:center;position:relative;z-index:1;text-shadow:0 0 30px #ff6b35;opacity:0;transition:opacity .15s;}
+#li-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,30,0.18) 3px,rgba(0,0,30,0.18) 4px);pointer-events:none;z-index:2;}
+
 /* ── IN-GAME HUD BAR ── */
-#hud-bar{display:none;width:100%;max-width:900px;background:rgba(0,0,10,0.88);border-bottom:2px solid #ff6b35;padding:4px 12px;flex-direction:row;align-items:center;gap:10px;flex-shrink:0;}
-.hud-cell{display:flex;flex-direction:column;align-items:center;min-width:60px;}
-.hud-lbl{color:#a78bfa;font-size:0.3rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:1px;}
-.hud-val{color:#ffd166;font-size:0.52rem;}
-#hud-shield-val{color:#00aaff;font-size:0.45rem;}
-#hud-laser-wrap{display:flex;flex-direction:column;align-items:center;min-width:70px;}
-#hud-lbar-bg{width:60px;height:4px;background:#222;margin-top:2px;}
+#hud-bar{display:none;width:100%;background:rgba(0,0,10,0.95);border-bottom:2px solid #ff6b35;padding:3px 10px;flex-direction:row;align-items:center;gap:8px;flex-shrink:0;flex-wrap:nowrap;overflow:hidden;box-sizing:border-box;}
+.hud-cell{display:flex;flex-direction:column;align-items:center;min-width:0;padding:0 2px;}
+.hud-lbl{color:#a78bfa;font-size:clamp(0.2rem,1.5vw,0.28rem);letter-spacing:1px;text-transform:uppercase;margin-bottom:1px;white-space:nowrap;}
+.hud-val{color:#ffd166;font-size:clamp(0.28rem,1.8vw,0.48rem);white-space:nowrap;}
+#hud-shield-val{color:#00aaff;font-size:clamp(0.22rem,1.4vw,0.38rem);white-space:nowrap;}
+#hud-laser-wrap{display:flex;flex-direction:column;align-items:center;min-width:0;}
+#hud-lbar-bg{width:clamp(30px,8vw,60px);height:3px;background:#222;margin-top:1px;}
 #hud-lbar{height:100%;width:100%;background:linear-gradient(90deg,#06d6a0,#00ffcc);}
 #hud-lives{display:flex;gap:2px;align-items:center;}
 #hud-score{color:#ffd166;font-size:0.6rem;}
-#hud-pause-btn{margin-left:auto;padding:4px 10px;background:#1a1a40;border:2px solid #4444aa;color:#aaaaff;font-family:'Press Start 2P',monospace;font-size:0.36rem;cursor:pointer;}
+#hud-pause-btn{margin-left:auto;flex-shrink:0;padding:3px 8px;background:#1a1a40;border:2px solid #4444aa;color:#aaaaff;font-family:'Press Start 2P',monospace;font-size:clamp(0.22rem,1.2vw,0.32rem);cursor:pointer;white-space:nowrap;}
 
 /* ── MAIN MENU OVERLAY ── */
 #main-menu{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#00000a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;overflow:hidden;}
@@ -36,20 +64,105 @@ canvas{display:block;touch-action:none;}
 #mm-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:100%;max-width:100%;height:100%;padding:clamp(8px,2vh,20px) 16px;gap:0;box-sizing:border-box;}
 #mm-canvas{display:block;margin:0;width:min(480px,88vw);max-width:88vw;height:auto;}
 #mm-sub{font-size:clamp(0.28rem,1.5vw,0.62rem);color:#ff6600;letter-spacing:1px;text-align:center;text-shadow:0 0 12px #ff440055;margin:0;}
-#mm-buttons{display:flex;flex-direction:column;align-items:center;gap:clamp(5px,1.2vh,11px);width:min(320px,90vw);}
-.mm-btn{width:100%;padding:clamp(7px,1.6vh,13px) 0;border:3px solid;font-family:'Press Start 2P',monospace;font-size:clamp(0.42rem,1.6vw,0.76rem);cursor:pointer;letter-spacing:2px;transition:transform .07s,box-shadow .07s,opacity .07s;text-align:center;}
-.mm-btn:hover{transform:scale(1.03);opacity:0.9;}
-.mm-btn:active{transform:scale(0.96);}
-#mm-play{background:#cc3300;border-color:#ff6b35;color:#fff;box-shadow:0 4px 0 #550000,0 0 20px #ff330033;}
-#mm-levels{background:#3a1070;border-color:#a78bfa;color:#ddd;box-shadow:0 4px 0 #1a0040;}
-#mm-scores{background:#001a10;border-color:#06d6a0;color:#06d6a0;box-shadow:0 4px 0 #001a08;}
+#mm-buttons{display:flex;flex-direction:column;align-items:center;gap:clamp(4px,0.9vh,9px);width:min(340px,92vw);}
+.mm-btn{width:100%;padding:clamp(6px,1.3vh,11px) 12px;border:2px solid;font-family:'Press Start 2P',monospace;font-size:clamp(0.36rem,1.4vw,0.62rem);cursor:pointer;letter-spacing:2px;text-align:center;position:relative;overflow:hidden;transition:transform .08s,box-shadow .08s,filter .08s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.mm-btn::before{content:'';position:absolute;left:-100%;top:0;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transition:left .35s;}
+.mm-btn:hover::before{left:120%;}
+.mm-btn:hover{transform:translateY(-2px);filter:brightness(1.15);}
+.mm-btn:active{transform:translateY(1px) scale(0.97);filter:brightness(0.9);}
+.mm-btn.pressed{animation:btnPress .15s ease-out;}
+@keyframes btnPress{0%{transform:scale(1)}40%{transform:scale(0.93)}100%{transform:scale(1)}}
+#mm-play{background:linear-gradient(180deg,#dd3300,#aa2200);border-color:#ff6b35;color:#fff;box-shadow:0 4px 0 #550000,0 0 18px #ff440044;text-shadow:0 1px 0 #000;}
+#mm-levels{background:linear-gradient(180deg,#3a1070,#2a0850);border-color:#a78bfa;color:#ddd;box-shadow:0 4px 0 #1a0040,0 0 14px #8844cc33;}
+#mm-scores{background:linear-gradient(180deg,#001a10,#000e08);border-color:#06d6a0;color:#06d6a0;box-shadow:0 4px 0 #001a08,0 0 12px #06d6a022;}
 #mm-diff{display:flex;gap:6px;justify-content:center;margin-top:4px;}
 .mm-diff-btn{padding:clamp(4px,1vh,7px) clamp(8px,2vw,14px);border:2px solid #333;color:#555;font-family:'Press Start 2P',monospace;font-size:clamp(0.3rem,1.2vw,0.38rem);cursor:pointer;background:#0a0a0a;transition:all .15s;}
 .mm-diff-btn.sel{color:#ff9f1c;border-color:#ff9f1c;background:rgba(255,159,28,0.12);box-shadow:0 0 8px #ff9f1c44;}
 #mm-footer{color:#2a2a2a;font-size:clamp(0.2rem,0.9vw,0.3rem);text-align:center;line-height:2;margin:0;}
 
+/* ── SETTINGS SCREEN ── */
+#settings-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#000011;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:700;gap:clamp(10px,2.5vh,22px);}
+.set-ttl{color:#a78bfa;font-size:clamp(0.5rem,2.5vw,0.9rem);letter-spacing:4px;text-align:center;}
+.set-row{display:flex;flex-direction:column;align-items:center;gap:8px;width:min(340px,88vw);}
+.set-lbl{color:#888;font-size:clamp(0.28rem,1.1vw,0.38rem);letter-spacing:2px;text-transform:uppercase;}
+.vol-wrap{display:flex;align-items:center;gap:10px;width:100%;}
+#vol-slider{flex:1;height:8px;-webkit-appearance:none;appearance:none;background:#222;border:2px solid #444;cursor:pointer;outline:none;}
+#vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#a78bfa;border:2px solid #fff;cursor:pointer;}
+#vol-slider::-moz-range-thumb{width:18px;height:18px;background:#a78bfa;border:2px solid #fff;cursor:pointer;}
+#vol-val{color:#ffd166;font-size:0.38rem;min-width:28px;text-align:right;}
+#mute-btn{padding:8px 18px;border:2px solid #555;color:#888;font-family:'Press Start 2P',monospace;font-size:clamp(0.3rem,1.1vw,0.4rem);cursor:pointer;background:#111;transition:all .15s;width:min(200px,80vw);}
+#mute-btn.muted{color:#ff4444;border-color:#ff4444;background:rgba(255,68,68,0.1);}
+#settings-back{padding:10px 24px;background:#1a0030;border:2px solid #a78bfa;color:#a78bfa;font-family:'Press Start 2P',monospace;font-size:0.45rem;cursor:pointer;}
+.set-sep{width:min(340px,88vw);height:1px;background:#1a1a40;}
+
+/* ── CHEAT CODE SCREEN ── */
+#cheat-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#00000f;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:800;gap:clamp(8px,2vh,16px);}
+#cheat-screen.locked{background:#00000f;}
+#cheat-title{font-size:clamp(0.5rem,2.5vw,0.85rem);color:#ff2200;letter-spacing:3px;text-shadow:0 0 20px #ff220066;text-align:center;}
+#cheat-lock-msg{color:#333;font-size:clamp(0.28rem,1vw,0.38rem);text-align:center;line-height:1.8;}
+#cheat-input-display{font-size:clamp(0.6rem,2.5vw,1.1rem);color:#ff6600;letter-spacing:10px;text-align:center;min-height:1.5em;text-shadow:0 0 10px #ff660066;}
+#cheat-options{display:none;flex-direction:column;gap:10px;width:min(360px,90vw);}
+.cheat-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid #222;background:#0a0a0a;cursor:pointer;transition:all .15s;}
+.cheat-opt:hover{border-color:#ff6600;background:rgba(255,102,0,0.08);}
+.cheat-opt.on{border-color:#ff6600;background:rgba(255,102,0,0.12);}
+.cheat-tog{width:18px;height:18px;border:2px solid #444;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.cheat-opt.on .cheat-tog{background:#ff6600;border-color:#ffaa00;}
+.cheat-tog-inner{width:10px;height:10px;background:#fff;display:none;}
+.cheat-opt.on .cheat-tog-inner{display:block;}
+.cheat-opt-label{color:#ccc;font-size:clamp(0.28rem,1.1vw,0.38rem);flex:1;}
+.cheat-opt.on .cheat-opt-label{color:#ff9900;}
+#cheat-warn{color:#ff2200;font-size:clamp(0.24rem,0.9vw,0.32rem);text-align:center;line-height:1.8;display:none;}
+#cheat-back{padding:10px 24px;background:#1a0000;border:2px solid #ff2200;color:#ff4444;font-family:'Press Start 2P',monospace;font-size:0.42rem;cursor:pointer;}
+
+/* ── STATS SCREEN ── */
+#stats-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#000011;display:none;flex-direction:column;align-items:center;justify-content:flex-start;z-index:700;padding:16px 8px;gap:8px;overflow-y:auto;}
+.stats-ttl{color:#06d6a0;font-size:clamp(0.5rem,2.5vw,0.85rem);letter-spacing:4px;text-align:center;flex-shrink:0;}
+#stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;width:100%;max-width:700px;}
+.stat-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;border:2px solid #1a3a28;background:#040e08;border-radius:2px;}
+.stat-icon{font-size:1.2rem;}
+.stat-label{color:#888;font-size:clamp(0.2rem,0.9vw,0.3rem);letter-spacing:2px;text-align:center;}
+.stat-value{color:#06d6a0;font-size:clamp(0.35rem,1.5vw,0.6rem);text-align:center;}
+#stats-back{padding:10px 24px;background:#001a10;border:2px solid #06d6a0;color:#06d6a0;font-family:'Press Start 2P',monospace;font-size:0.45rem;cursor:pointer;flex-shrink:0;margin-top:8px;}
+
+/* ── RESET CONFIRM STYLES ── */
+#reset-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;}
+#reset-confirm-box{border:3px solid #ff0000;background:#0a0000;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:380px;width:90vw;}
+.reset-ttl{color:#ff0000;font-size:0.55rem;letter-spacing:3px;text-align:center;text-shadow:0 0 14px #ff000088;}
+.reset-desc{color:#ff6666;font-size:0.28rem;text-align:center;line-height:1.8;}
+#reset-confirm-btn{padding:10px 20px;border:2px solid #ff0000;background:#2a0000;color:#ff4444;font-family:'Press Start 2P',monospace;font-size:0.38rem;cursor:pointer;letter-spacing:2px;}
+#reset-cancel-btn{padding:8px 20px;border:2px solid #444;background:#111;color:#888;font-family:'Press Start 2P',monospace;font-size:0.32rem;cursor:pointer;}
+#reset-step2{display:none;flex-direction:column;align-items:center;gap:12px;}
+#reset-step1{display:flex;flex-direction:column;align-items:center;gap:12px;}
+
+/* ── ACHIEVEMENTS ── */
+#achievements-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#000011;display:none;flex-direction:column;align-items:center;justify-content:flex-start;z-index:700;padding:16px 8px;gap:8px;overflow-y:auto;}
+.ach-ttl{color:#ffd166;font-size:clamp(0.5rem,2.5vw,0.85rem);letter-spacing:4px;text-align:center;flex-shrink:0;}
+#ach-progress{color:#a78bfa;font-size:clamp(0.25rem,1vw,0.38rem);text-align:center;flex-shrink:0;}
+#ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;width:100%;max-width:800px;}
+.ach-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border:2px solid #222;background:#080018;border-radius:4px;transition:border-color .2s;}
+.ach-card.unlocked{border-color:#ffd166;background:rgba(255,209,102,0.07);}
+.ach-card.locked{opacity:0.45;filter:grayscale(0.6);}
+.ach-icon{font-size:1.4rem;line-height:1;}
+.ach-name{color:#ffd166;font-size:clamp(0.22rem,1vw,0.35rem);text-align:center;letter-spacing:1px;}
+.ach-card.locked .ach-name{color:#555;}
+.ach-desc{color:#a78bfa;font-size:clamp(0.18rem,0.8vw,0.28rem);text-align:center;line-height:1.4;}
+.ach-card.locked .ach-desc{color:#333;}
+.ach-date{color:#555;font-size:0.2rem;text-align:center;}
+.ach-card.unlocked .ach-date{color:#888;}
+/* Achievement toast popup */
+#ach-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120%);z-index:900;
+  background:#0a000f;border:2px solid #ffd166;padding:10px 18px;
+  display:flex;align-items:center;gap:10px;min-width:260px;max-width:90vw;
+  transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;pointer-events:none;}
+#ach-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#ach-toast-icon{font-size:1.3rem;}
+#ach-toast-text{display:flex;flex-direction:column;gap:2px;}
+#ach-toast-label{color:#ffd166;font-size:0.32rem;letter-spacing:2px;}
+#ach-toast-name{color:#fff;font-size:0.38rem;}
+#scores-back-ach{padding:10px 24px;background:#222;border:2px solid #ffd166;color:#ffd166;font-family:'Press Start 2P',monospace;font-size:0.45rem;cursor:pointer;flex-shrink:0;}
+
 /* ── SCOREBOARD SCREEN ── */
-#scores-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#000011;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:400;gap:12px;}
+#scores-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:#000011;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:700;gap:12px;}
 .sb-ttl{color:#ff6b35;font-size:0.6rem;letter-spacing:4px;text-align:center;}
 #sb-list{display:flex;flex-direction:column;gap:4px;width:min(400px,90vw);}
 .sbr{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:0.4rem;background:rgba(255,255,255,0.03);border:1px solid #222;}
@@ -72,20 +185,39 @@ canvas{display:block;touch-action:none;}
 #levels-btn{display:none;}
 #pause-btn{display:none;}
 
-/* TOUCH CONTROLS */
-#controls{display:none;justify-content:space-between;align-items:center;width:100%;padding:4px 10px 2px;flex-shrink:0;gap:4px;}
-.btn-grp{display:flex;gap:6px;align-items:center;}
-.c-btn-cv{display:block;border-radius:6px;border:3px solid #555;cursor:pointer;touch-action:none;flex-shrink:0;transition:transform .05s,opacity .05s;image-rendering:pixelated;background:rgba(0,0,0,0.5);}
-.c-btn-cv.tapped{transform:scale(0.87);opacity:0.6;}
-#cb-left,#cb-right{border-color:#a78bfa;}
-#cb-fire{border-color:#ff6b35;}
-#cb-laser{border-color:#06d6a0;}
-#cb-shield{border-color:#00aaff;}
-#cb-pause{border-color:#aaaaff;}
+/* TOUCH CONTROLS — in normal document flow below canvas */
+/* TOUCH CONTROLS — truly flat single row, ~90px max height */
+#controls{
+  display:none;flex-direction:row;justify-content:space-between;align-items:center;
+  width:100%;padding:4px 12px 6px;gap:0;box-sizing:border-box;flex-shrink:0;
+  background:rgba(0,0,14,0.92);border-top:1px solid #1a1a40;
+}
+/* three zones: move | powerups | fire */
+.ctrl-zone{display:flex;flex-direction:row;align-items:center;gap:4px;}
+.c-btn-cv{
+  display:block;border-radius:8px;border:2.5px solid #555;
+  cursor:pointer;touch-action:none;flex-shrink:0;
+  transition:transform .05s,opacity .05s;
+  image-rendering:pixelated;background:rgba(0,0,14,0.55);
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none;
+  outline:none!important;user-select:none;-webkit-user-select:none;
+}
+.c-btn-cv.tapped{transform:scale(0.88);opacity:0.55;}
+/* movement — all 4 in a row, left/right bigger since most-used */
+#cb-left, #cb-right{border-color:#a78bfa;width:72px;height:72px;}
+#cb-up,   #cb-down {border-color:#a78bfa;width:58px;height:58px;}
+/* power-ups */
+#cb-laser {border-color:#06d6a0;width:66px;height:66px;}
+#cb-shield{border-color:#00aaff;width:66px;height:66px;}
+#cb-pause {border-color:#aaaaff;width:50px;height:50px;}
+/* fire — biggest, rightmost */
+#cb-fire  {border-color:#ff6b35;width:80px;height:80px;}
 #hint{color:rgba(167,139,250,0.35);font-size:0.45rem;text-align:center;padding:1px 0 2px;flex-shrink:0;}
+/* Portrait: controls are rotated with the app — same layout works */
 
 /* MODALS */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;z-index:600;}
 .modal-bg.show{display:flex;}
 .mbox{background:#0d001a;border:4px solid #ff6b35;padding:18px 24px;display:flex;flex-direction:column;gap:10px;text-align:center;min-width:240px;max-width:94vw;max-height:90vh;overflow-y:auto;}
 .mbox h2{color:#ff6b35;font-size:0.9rem;letter-spacing:2px;}
@@ -98,7 +230,7 @@ canvas{display:block;touch-action:none;}
 .mbtn.secondary{background:#7c3aed;border-color:#a78bfa;}
 
 /* LEVELS GRID */
-#lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:4px;}
+#lvl-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:4px;}
 .lc{padding:7px 2px;font-size:0.42rem;text-align:center;border:2px solid #222;color:#333;font-family:'Press Start 2P',monospace;}
 .lc.open{color:#ffd166;border-color:#555;cursor:pointer;}
 .lc.open:hover{background:rgba(167,139,250,0.15);border-color:#a78bfa;}
@@ -108,7 +240,7 @@ canvas{display:block;touch-action:none;}
 .lc.boss.cur{border-color:#ff0040;background:rgba(255,0,64,0.1);}
 
 /* PAUSE OVERLAY */
-#pause-ov{position:fixed;inset:0;background:rgba(0,0,0,0.78);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:150;}
+#pause-ov{position:fixed;inset:0;background:rgba(0,0,0,0.78);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:600;}
 #pause-ov.show{display:flex;}
 #pause-ov h2{font-size:1.4rem;color:#fff;text-shadow:3px 3px 0 #000;}
 #pause-ov .mbtn{min-width:160px;}
@@ -128,10 +260,6 @@ canvas{display:block;touch-action:none;}
 @media(orientation:portrait){
   body{overflow:hidden;}
   #app{transform-origin:top left;transform:rotate(90deg) translateY(-100%);width:100vh;height:100vw;position:fixed;top:0;left:0;}
-  #controls{padding:3px 8px 1px;}
-  #cb-left,#cb-right{width:76px;height:76px;}
-  #cb-fire,#cb-laser,#cb-shield{width:64px;height:64px;}
-  #cb-pause{width:50px;height:50px;}
   #sidebar{width:128px;}
   .sval{font-size:0.55rem;}
   #name-modal,#levels-modal,#pause-ov,#lvlcomplete-modal{transform:rotate(-90deg) translateX(-100%);transform-origin:top left;width:100vw;height:100vh;top:0;left:0;}
@@ -146,19 +274,77 @@ canvas{display:block;touch-action:none;}
   <canvas id="mm-bg-canvas"></canvas>
   <div id="mm-content">
     <canvas id="mm-canvas" width="560" height="120"></canvas>
-    <div id="mm-sub">30 LEVELS &nbsp;·&nbsp; 6 BOSSES &nbsp;·&nbsp; UNLIMITED CHAOS</div>
+    <div id="mm-sub">150 LEVELS &nbsp;·&nbsp; 30 BOSSES &nbsp;·&nbsp; UNLIMITED CHAOS</div>
     <div id="mm-buttons">
       <button class="mm-btn" id="mm-play">▶ &nbsp; PLAY</button>
       <button class="mm-btn" id="mm-levels">LEVEL SELECT</button>
       <button class="mm-btn" id="mm-scores">HIGH SCORES</button>
-      <div id="mm-diff">
-        <button class="mm-diff-btn sel" data-d="easy">EASY</button>
-        <button class="mm-diff-btn" data-d="medium">MEDIUM</button>
-        <button class="mm-diff-btn" data-d="hard">HARD</button>
-      </div>
+      <button class="mm-btn" id="mm-achievements" style="background:#1a1000;border-color:#ffd166;color:#ffd166;box-shadow:0 4px 0 #3a2a00;">🏆 ACHIEVEMENTS</button>
+      <button class="mm-btn" id="mm-settings">⚙ SETTINGS</button>
+
     </div>
-    <div id="mm-footer">A/D MOVE &nbsp;·&nbsp; SPACE FIRE &nbsp;·&nbsp; X LASER &nbsp;·&nbsp; B SHIELD &nbsp;·&nbsp; P PAUSE</div>
+    <div id="mm-footer">A/D MOVE &nbsp;·&nbsp; SPACE FIRE &nbsp;·&nbsp; X LASER &nbsp;·&nbsp; E SHIELD &nbsp;·&nbsp; P PAUSE</div>
   </div>
+</div>
+
+<!-- ══════════════ SETTINGS SCREEN ══════════════ -->
+<div id="settings-screen">
+  <div class="set-ttl">⚙ SETTINGS</div>
+  <div class="set-sep"></div>
+  <div class="set-row">
+    <div class="set-lbl">MASTER VOLUME</div>
+    <div class="vol-wrap">
+      <input type="range" id="vol-slider" min="0" max="100" value="30">
+      <span id="vol-val">30</span>
+    </div>
+  </div>
+  <div class="set-row">
+    <div class="set-lbl">MUTE</div>
+    <button id="mute-btn">🔊 SOUND ON</button>
+  </div>
+  <div class="set-sep"></div>
+  <div class="set-row">
+    <div class="set-lbl">DIFFICULTY</div>
+    <div id="set-diff">
+      <button class="mm-diff-btn sel" data-d="easy">EASY</button>
+      <button class="mm-diff-btn" data-d="medium">MEDIUM</button>
+      <button class="mm-diff-btn" data-d="hard">HARD</button>
+    </div>
+  </div>
+  <div class="set-sep"></div>
+  <button id="set-cheats-btn" style="padding:clamp(7px,1.5vh,12px) 0;width:min(300px,88vw);border:2px solid #ff4400;color:#ff6600;font-family:'Press Start 2P',monospace;font-size:clamp(0.38rem,1.4vw,0.55rem);cursor:pointer;background:#1a0800;letter-spacing:2px;">☠ CHEAT CODES</button>
+  <div class="set-sep"></div>
+  <button id="set-stats-btn" style="padding:clamp(7px,1.5vh,12px) 0;width:min(300px,88vw);border:2px solid #06d6a0;color:#06d6a0;font-family:'Press Start 2P',monospace;font-size:clamp(0.38rem,1.4vw,0.55rem);cursor:pointer;background:#001a10;letter-spacing:2px;">📊 STATISTICS</button>
+  <button id="set-reset-btn" style="padding:clamp(7px,1.5vh,12px) 0;width:min(300px,88vw);border:2px solid #440000;color:#ff2222;font-family:'Press Start 2P',monospace;font-size:clamp(0.38rem,1.4vw,0.55rem);cursor:pointer;background:#0a0000;letter-spacing:2px;">💀 RESET PROGRESS</button>
+  <div class="set-sep"></div>
+  <button id="settings-back">BACK</button>
+</div>
+
+<!-- ══════════════ CHEAT CODE SCREEN ══════════════ -->
+<div id="cheat-screen">
+  <div id="cheat-title">// CHEAT CODES //</div>
+  <div id="cheat-lock-msg">TYPE THE SECRET CODE TO UNLOCK</div>
+  <div id="cheat-input-display">_ _ _ _</div>
+  <div id="cheat-options">
+    <div class="cheat-opt" id="cheat-unlockall">
+      <div class="cheat-tog"><div class="cheat-tog-inner"></div></div>
+      <div class="cheat-opt-label">UNLOCK ALL LEVELS</div>
+    </div>
+    <div class="cheat-opt" id="cheat-infhealth">
+      <div class="cheat-tog"><div class="cheat-tog-inner"></div></div>
+      <div class="cheat-opt-label">INFINITE HEALTH</div>
+    </div>
+    <div class="cheat-opt" id="cheat-infpower">
+      <div class="cheat-tog"><div class="cheat-tog-inner"></div></div>
+      <div class="cheat-opt-label">UNLIMITED POWER-UPS</div>
+    </div>
+    <div class="cheat-opt" id="cheat-megadmg">
+      <div class="cheat-tog"><div class="cheat-tog-inner"></div></div>
+      <div class="cheat-opt-label">MEGA DAMAGE (300x)</div>
+    </div>
+  </div>
+  <div id="cheat-warn">⚠ CHEATS ACTIVE — SCORING DISABLED ⚠</div>
+  <button id="cheat-back">BACK</button>
 </div>
 
 <!-- ══════════════ SCORES SCREEN ══════════════ -->
@@ -226,18 +412,75 @@ canvas{display:block;touch-action:none;}
       <div id="overlay-msg"></div>
     </div>
     <div id="controls">
-      <div class="btn-grp">
-        <canvas class="c-btn-cv" id="cb-left" width="80" height="80"></canvas>
-        <canvas class="c-btn-cv" id="cb-right" width="80" height="80"></canvas>
+      <!-- LEFT ZONE: ← ↑ ↓ → all in one row -->
+      <div class="ctrl-zone">
+        <canvas class="c-btn-cv" id="cb-left"  width="72" height="72"></canvas>
+        <canvas class="c-btn-cv" id="cb-up"    width="58" height="58"></canvas>
+        <canvas class="c-btn-cv" id="cb-down"  width="58" height="58"></canvas>
+        <canvas class="c-btn-cv" id="cb-right" width="72" height="72"></canvas>
       </div>
-      <canvas class="c-btn-cv" id="cb-pause" width="52" height="52"></canvas>
-      <div class="btn-grp">
-        <canvas class="c-btn-cv" id="cb-fire" width="72" height="72"></canvas>
-        <canvas class="c-btn-cv" id="cb-laser" width="72" height="72"></canvas>
-        <canvas class="c-btn-cv" id="cb-shield" width="72" height="72"></canvas>
+      <!-- MIDDLE ZONE: pause · laser · shield -->
+      <div class="ctrl-zone" style="gap:6px;">
+        <canvas class="c-btn-cv" id="cb-pause"  width="50" height="50"></canvas>
+        <canvas class="c-btn-cv" id="cb-laser"  width="66" height="66"></canvas>
+        <canvas class="c-btn-cv" id="cb-shield" width="66" height="66"></canvas>
+      </div>
+      <!-- RIGHT ZONE: fire -->
+      <div class="ctrl-zone">
+        <canvas class="c-btn-cv" id="cb-fire" width="80" height="80"></canvas>
       </div>
     </div>
-    <div id="hint" style="display:none;">A/D Move · Space Fire · X Laser · B Shield · P Pause</div>
+    <div id="hint" style="display:none;">A/D Move · Space Fire · X Laser · E Shield · P Pause</div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENTS SCREEN -->
+<div id="achievements-screen">
+  <div class="ach-ttl">🏆 ACHIEVEMENTS</div>
+  <div id="ach-progress"></div>
+  <div id="ach-grid"></div>
+  <button class="mbtn secondary" id="scores-back-ach" style="margin-top:8px;">← BACK</button>
+</div>
+<!-- ACHIEVEMENT TOAST -->
+<div id="ach-toast">
+  <div id="ach-toast-icon">🏆</div>
+  <div id="ach-toast-text">
+    <div id="ach-toast-label">ACHIEVEMENT UNLOCKED</div>
+    <div id="ach-toast-name"></div>
+  </div>
+</div>
+
+<!-- LEVEL INTRO OVERLAY -->
+<div id="level-intro">
+  <div id="level-intro-bg"></div>
+  <div id="li-scanlines"></div>
+  <div id="li-section">— SECTION —</div>
+  <div id="li-level">LEVEL 1</div>
+  <div id="li-name">THE BEGINNING</div>
+  <div id="li-countdown">3</div>
+</div>
+
+<!-- STATS SCREEN -->
+<div id="stats-screen">
+  <div class="stats-ttl">📊 STATISTICS</div>
+  <div id="stats-grid"></div>
+  <button id="stats-back">← BACK</button>
+</div>
+
+<!-- RESET CONFIRM OVERLAY -->
+<div id="reset-confirm-overlay">
+  <div id="reset-confirm-box">
+    <div class="reset-ttl">⚠ RESET ALL PROGRESS ⚠</div>
+    <div id="reset-step1">
+      <div class="reset-desc">This will erase ALL progress:<br>levels, scores, achievements,<br>and statistics. Forever.</div>
+      <button id="reset-confirm-btn">YES, ERASE EVERYTHING</button>
+      <button id="reset-cancel-btn">CANCEL</button>
+    </div>
+    <div id="reset-step2">
+      <div class="reset-desc" style="color:#ff2222;">ARE YOU ABSOLUTELY SURE?<br>This CANNOT be undone.</div>
+      <button id="reset-confirm-btn2" style="padding:10px 20px;border:2px solid #ff0000;background:#3a0000;color:#ff2222;font-family:'Press Start 2P',monospace;font-size:0.38rem;cursor:pointer;">☠ CONFIRM TOTAL WIPE ☠</button>
+      <button id="reset-cancel-btn2" style="padding:8px 20px;border:2px solid #444;background:#111;color:#888;font-family:'Press Start 2P',monospace;font-size:0.32rem;cursor:pointer;">CANCEL</button>
+    </div>
   </div>
 </div>
 
@@ -255,7 +498,12 @@ canvas{display:block;touch-action:none;}
 <div class="modal-bg" id="levels-modal">
   <div class="mbox">
     <h2>SELECT LEVEL</h2>
-    <p>Boss every 5th level · Red = Boss stage</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;">
+      <button class="mbtn secondary" id="lvl-page-prev" style="padding:4px 10px;font-size:0.5rem;">◀</button>
+      <span id="lvl-page-indicator" style="color:#a78bfa;font-size:0.3rem;text-align:center;flex:1;">PAGE 1/3 · LEVELS 1-30</span>
+      <button class="mbtn secondary" id="lvl-page-next" style="padding:4px 10px;font-size:0.5rem;">▶</button>
+    </div>
+    <p style="font-size:0.3rem;">★ = Boss level</p>
     <div id="lvl-grid"></div>
     <button class="mbtn secondary" id="lvl-close">CLOSE</button>
   </div>
@@ -287,8 +535,18 @@ canvas{display:block;touch-action:none;}
 // ═══════════════════════════════════════════════════
 let AC=null,MG=null,bgmOn=false,laserNodes=[],bgmTO=null,bossTO=null,_bgmSection=0;
 function ga(){
-  if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.gain.value=0.30;MG.connect(AC.destination);}
+  if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.gain.value=audioVol;MG.connect(AC.destination);}
   if(AC.state==='suspended')AC.resume();return AC;
+}
+function setVolume(v){
+  audioVol=v/100;
+  if(MG)MG.gain.value=audioMuted?0:audioVol;
+}
+function setMute(m){
+  audioMuted=m;
+  if(MG)MG.gain.value=audioMuted?0:audioVol;
+  const mb=document.getElementById('mute-btn');
+  if(mb){mb.textContent=audioMuted?'🔇 MUTED':'🔊 SOUND ON';mb.className=audioMuted?'muted':'';}
 }
 function tone(f,tp,t,dur,v,sl){
   const ac=ga(),o=ac.createOscillator(),g=ac.createGain();
@@ -337,6 +595,9 @@ function sfxBossAlarm(){const ac=ga(),t=ac.currentTime;for(let i=0;i<5;i++){tone
 function sfxBossWin(){const ac=ga(),t=ac.currentTime;[523,659,784,1047,784,1047,1319,1047,1319,1568].forEach((f,i)=>tone(f,'square',t+i*.075,.09,.28,f*1.04));sfxExplode(true);noise(t+.1,.8,.4,150);}
 function sfxHit(){const ac=ga(),t=ac.currentTime;tone(800,'square',t,.05,.22,400);tone(400,'square',t+.04,.08,.16,200);noise(t,.07,.14,2000);}
 function sfxLoseLife(){const ac=ga(),t=ac.currentTime;tone(440,'square',t,.12,.3,220);tone(330,'square',t+.1,.12,.25,165);tone(220,'sawtooth',t+.22,.22,.35,80);noise(t+.22,.25,.12,300);}
+function sfxMenuClick(){const ac=ga(),t=ac.currentTime;tone(660,'square',t,.005,.07,1.08);tone(880,'square',t+.04,.003,.05,1);}
+function sfxMenuHover(){const ac=ga(),t=ac.currentTime;tone(440,'square',t,.003,.04,1);}
+function sfxMenuBack(){const ac=ga(),t=ac.currentTime;tone(330,'square',t,.005,.07,0.92);}
 function sfxGameOver(){sfxLaserStop();stopBGM();const ac=ga(),t=ac.currentTime;[440,349,294,220,196,165,147,110].forEach((f,i)=>tone(f,'square',t+i*.16,.20,.28-i*.02));}
 function sfxWaveDone(){const ac=ga(),t=ac.currentTime;[523,659,784,659,784,1047].forEach((f,i)=>tone(f,'square',t+i*.1,.12,.22));}
 function sfxLevelUp(){const ac=ga(),t=ac.currentTime;[392,494,587,784,1047,1319].forEach((f,i)=>tone(f,'square',t+i*.09,.13,.28));}
@@ -487,8 +748,53 @@ function scheduleBGM(){
     dur=Math.max(bl,ll,al);
   }
   _bgmSection=(_bgmSection+1)%3;
-  bgmTO=setTimeout(scheduleBGM,(dur-.06)*1000);
+  bgmTO=setTimeout(scheduleBGM,Math.max(10,(dur-.12)*1000));
 }
+
+// ══ MAIN MENU MUSIC ══════════════════════════════════════
+// Catchy 8-bit theme: C major feel, bouncy & upbeat
+let mmMusicOn=false,mmMusicTO=null,mmMusicSection=0;
+const _mq=0.12,_mh=0.24,_me=0.06;
+const MM_BASS=[
+  [131,_mh],[0,_me],[131,_me],[165,_mh],[0,_me],[165,_me],
+  [196,_mh],[0,_me],[196,_me],[165,_mh],[0,_mh],
+  [131,_mh],[0,_me],[131,_me],[147,_mh],[0,_me],[147,_me],
+  [131,_mh],[0,_me],[98,_me],[110,_mh],[0,_mh],
+];
+const MM_LEAD=[
+  [523,_me],[587,_me],[659,_me],[523,_me],[659,_me],[784,_me],[659,_me],[523,_me],
+  [587,_me],[659,_me],[784,_me],[880,_me],[784,_me],[659,_me],[587,_me],[523,_me],
+  [659,_me],[523,_me],[587,_me],[494,_me],[523,_me],[440,_me],[494,_me],[523,_me],
+  [587,_me],[523,_me],[494,_me],[440,_me],[392,_me],[440,_me],[523,_me],[659,_me],
+];
+const MM_ARP=[
+  [262,_me],[330,_me],[392,_me],[330,_me],[262,_me],[330,_me],[392,_me],[523,_me],
+  [294,_me],[370,_me],[440,_me],[370,_me],[294,_me],[370,_me],[440,_me],[587,_me],
+  [247,_me],[330,_me],[392,_me],[330,_me],[247,_me],[330,_me],[392,_me],[494,_me],
+  [220,_me],[294,_me],[370,_me],[294,_me],[220,_me],[294,_me],[370,_me],[440,_me],
+];
+function scheduleMMMusic(){
+  if(!mmMusicOn)return;
+  const ac=ga(),t=ac.currentTime+.04;
+  // Bass
+  let dur=0;
+  let tBass=t;for(const[f,d]of MM_BASS){if(f>0)tone(f,'square',tBass,.22,d*.9);tBass+=d;}
+  // Lead melody
+  let tLead=t;for(const[f,d]of MM_LEAD){if(f>0)tone(f,'square',tLead,.12,d*.85);tLead+=d;}
+  dur=tLead-t;
+  // Arp harmony
+  let tArp=t;for(const[f,d]of MM_ARP){if(f>0)tone(f,'triangle',tArp,.07,d*.8);tArp+=d;}
+  // Percussion
+  const bt=_mh;
+  for(let b=0;b<8;b++){
+    noise(t+b*bt*.5,.025,.18,120);// kick
+    if(b%2===1)noise(t+b*bt*.5,.02,.14,3800);// snare
+    noise(t+b*bt*.5+bt*.25,.012,.06,9000);// hat
+  }
+  mmMusicTO=setTimeout(scheduleMMMusic,Math.max(10,(dur-.1)*1000));
+}
+function startMMMusic(){if(mmMusicOn)return;mmMusicOn=true;scheduleMMMusic();}
+function stopMMMusic(){mmMusicOn=false;if(mmMusicTO){clearTimeout(mmMusicTO);mmMusicTO=null;}}
 
 function startBGM(){if(bgmOn)return;bgmOn=true;_bgmSection=0;scheduleBGM();}
 function stopBGM(){bgmOn=false;if(bgmTO){clearTimeout(bgmTO);bgmTO=null;}if(bossTO){clearTimeout(bossTO);bossTO=null;}sfxLaserStop();}
@@ -608,21 +914,32 @@ const ctx=canvas.getContext('2d');
 const GW=900,GH=560;
 canvas.width=GW;canvas.height=GH;
 function resizeCanvas(){
-  const ctrls=document.getElementById('controls');
   const hudBar=document.getElementById('hud-bar');
-  const cv=ctrls&&ctrls.style.display==='flex';
-  const isP=window.innerHeight>window.innerWidth;
-  const lW=isP?window.innerHeight:window.innerWidth;
-  const lH=isP?window.innerWidth:window.innerHeight;
-  const hudH=(hudBar&&hudBar.style.display==='flex')?hudBar.offsetHeight:0;
-  const ctrlH=cv?(ctrls.offsetHeight+8):0;
-  const aW=lW-8, aH=lH-hudH-ctrlH-8;
-  let cw=Math.min(aW,aH*GW/GH),ch=cw*GH/GW;
-  if(ch>aH){ch=aH;cw=ch*GW/GH;}
-  canvas.style.width=Math.floor(cw)+'px';canvas.style.height=Math.floor(ch)+'px';
+  const ctrls=document.getElementById('controls');
+  const hudVisible=hudBar&&hudBar.style.display==='flex';
+  const ctrlVisible=ctrls&&ctrls.style.display==='flex';
+  // Portrait: #app is CSS-rotated 90°, so viewport dims are swapped
+  const isPortrait=window.innerHeight>window.innerWidth;
+  const vW=isPortrait?window.innerHeight:window.innerWidth;
+  const vH=isPortrait?window.innerWidth:window.innerHeight;
+  // Subtract actual heights of HUD and controls bars
+  const hudH=hudVisible?hudBar.offsetHeight:0;
+  const ctrlH=ctrlVisible?ctrls.offsetHeight:0;
+  const availW=vW;
+  const availH=vH-hudH-ctrlH;
+  // Fit 900:560 aspect ratio into available space
+  const ratio=GW/GH;
+  let cw=availW;
+  let ch=cw/ratio;
+  if(ch>availH){ch=availH;cw=ch*ratio;}
+  canvas.style.width=Math.floor(cw)+'px';
+  canvas.style.height=Math.floor(ch)+'px';
 }
-window.addEventListener('resize',resizeCanvas);
-window.addEventListener('orientationchange',()=>setTimeout(resizeCanvas,120));
+window.addEventListener('resize',()=>requestAnimationFrame(resizeCanvas));
+// Auto-pause when window loses focus
+window.addEventListener('blur',()=>{if(running&&!paused)doPause();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&running&&!paused)doPause();});
+window.addEventListener('orientationchange',()=>setTimeout(resizeCanvas,150));
 
 // ═══════════════════════════════════════════════════
 //  SCORES & PROGRESS
@@ -637,23 +954,298 @@ function renderSB(){
 }
 renderSB();
 
+// ═══════════════════════════════════════════════════
+//  ACHIEVEMENTS
+// ═══════════════════════════════════════════════════
+const ACH_DEFS=[
+  // Progress milestones
+  {id:'first_blood',  icon:'🎯', name:'First Blood',        desc:'Destroy your first enemy'},
+  {id:'boss1',        icon:'👑', name:'Lid Lifted',          desc:'Defeat The Lid King (Level 5)'},
+  {id:'boss2',        icon:'🧊', name:'Frost Broken',        desc:'Defeat Frostlock (Level 10)'},
+  {id:'boss3',        icon:'🍳', name:'Heat Off',            desc:'Defeat Saucepan Sam (Level 15)'},
+  {id:'boss4',        icon:'🥦', name:'Crisper Crushed',     desc:'Defeat Crisper Lord (Level 20)'},
+  {id:'boss5',        icon:'☕', name:'Thermos Smashed',     desc:'Defeat Thermos Prime (Level 25)'},
+  {id:'boss6',        icon:'🌟', name:'Supernova Stopped',   desc:'Defeat Supernova Tupperware (Level 30)'},
+  {id:'page2',        icon:'🌀', name:'Into The Void',       desc:'Reach Level 31'},
+  {id:'boss12',       icon:'🕳️', name:'Void Slain',          desc:'Defeat Void Lunchbox (Level 35)'},
+  {id:'boss18',       icon:'🔴', name:'Necro Purged',        desc:'Defeat The Necroplastic (Level 95)'},
+  {id:'page3',        icon:'⚡', name:'Beyond The Storm',    desc:'Reach Level 61'},
+  {id:'page4',        icon:'💀', name:'Deaths Doorstep',   desc:'Reach Level 91'},
+  {id:'page5',        icon:'∞',  name:'True Challenger',     desc:'Reach Level 121'},
+  {id:'boss_final',   icon:'🔥', name:'Primordial Purified', desc:'Defeat The Primordial Tupperware (Level 150)'},
+  // Skill achievements
+  {id:'no_dmg_boss',  icon:'🛡️', name:'Untouchable',         desc:'Defeat any boss without taking damage'},
+  {id:'laser_kill10', icon:'⚡', name:'Laser Lord',          desc:'Kill 10 enemies with laser in one level'},
+  {id:'shield_save',  icon:'💫', name:'Close Call',          desc:'Block a hit with shield active'},
+  {id:'score_10k',    icon:'💰', name:'Ten Grand',           desc:'Reach 10,000 points'},
+  {id:'score_100k',   icon:'💎', name:'Hundred Thousand',    desc:'Reach 100,000 points'},
+  {id:'score_1m',     icon:'👾', name:'One Million',         desc:'Reach 1,000,000 points'},
+  {id:'wave5',        icon:'🌊', name:'Wave Surfer',         desc:'Complete 5 waves in one level'},
+  {id:'no_miss_wave', icon:'✨', name:'Perfect Wave',        desc:'Clear a wave without taking damage'},
+  {id:'heart_grab',   icon:'❤️', name:'Life Saver',          desc:'Collect a heart drop'},
+  {id:'speed_kill',   icon:'💨', name:'Blitz',               desc:'Kill 20 enemies in under 10 seconds'},
+  {id:'level_10',     icon:'🎮', name:'Getting Serious',     desc:'Complete Level 10'},
+  {id:'level_30',     icon:'🎖️', name:'First Chapter Done', desc:'Complete Level 30'},
+  {id:'level_60',     icon:'🎗️', name:'Halfway There',      desc:'Complete Level 60'},
+  {id:'level_90',     icon:'🏅', name:'Three Chapters',      desc:'Complete Level 90'},
+  {id:'level_120',    icon:'🥇', name:'Four Chapters',       desc:'Complete Level 120'},
+  {id:'cheat_user',   icon:'😈', name:'Dirty Cheater',       desc:'Activate any cheat code'},
+  {id:'die_10',       icon:'💀', name:'Never Give Up',       desc:'Die 10 times (you got this)'},
+  {id:'fresh_start',  icon:'🔄', name:'Fresh Start',          desc:'Reset all progress (brave soul)'},
+];
+
+let achUnlocked={};
+try{achUnlocked=JSON.parse(localStorage.getItem('tupperAch')||'{}');}catch(_){}
+function saveAch(){try{localStorage.setItem('tupperAch',JSON.stringify(achUnlocked));}catch(_){}}
+
+let _achToastTO=null;
+function unlockAch(id){
+  if(achUnlocked[id])return; // already have it
+  const def=ACH_DEFS.find(a=>a.id===id);
+  if(!def)return;
+  achUnlocked[id]=Date.now();
+  saveAch();
+  // Show toast
+  const toast=document.getElementById('ach-toast');
+  const icon=document.getElementById('ach-toast-icon');
+  const name=document.getElementById('ach-toast-name');
+  if(toast&&icon&&name){
+    icon.textContent=def.icon;
+    name.textContent=def.name;
+    toast.classList.add('show');
+    if(_achToastTO)clearTimeout(_achToastTO);
+    _achToastTO=setTimeout(()=>toast.classList.remove('show'),3200);
+  }
+}
+
+function buildAchGrid(){
+  const grid=document.getElementById('ach-grid');
+  const prog=document.getElementById('ach-progress');
+  if(!grid)return;
+  grid.innerHTML='';
+  const total=ACH_DEFS.length;
+  const earned=ACH_DEFS.filter(a=>achUnlocked[a.id]).length;
+  if(prog)prog.textContent=earned+' / '+total+' UNLOCKED';
+  for(const def of ACH_DEFS){
+    const unlocked=!!achUnlocked[def.id];
+    const card=document.createElement('div');
+    card.className='ach-card'+(unlocked?' unlocked':' locked');
+    const dateStr=unlocked?new Date(achUnlocked[def.id]).toLocaleDateString():'';
+    card.innerHTML=
+      '<div class="ach-icon">'+def.icon+'</div>'+
+      '<div class="ach-name">'+(unlocked?def.name:'???')+'</div>'+
+      '<div class="ach-desc">'+(unlocked?def.desc:'Keep playing to unlock')+'</div>'+
+      (unlocked?'<div class="ach-date">'+dateStr+'</div>':'');
+    grid.appendChild(card);
+  }
+}
+
+// Achievement tracking state
+let _achKillTimer=0,_achKillCount=0;
+let _achBossDmgTaken=false;
+let _achWaveDmgTaken=false;
+let _achLaserKills=0;
+let _achDeaths=0;
+let _achShieldBlocked=false;
+
+function achOnKill(){
+  unlockAch('first_blood');
+  // Speed kill: 20 in 10 seconds
+  const now=Date.now();
+  if(now-_achKillTimer<10000){
+    _achKillCount++;
+    if(_achKillCount>=20)unlockAch('speed_kill');
+  } else {
+    _achKillTimer=now;_achKillCount=1;
+  }
+}
+function achOnLaserKill(){_achLaserKills++;if(_achLaserKills>=10)unlockAch('laser_kill10');}
+function achOnHeart(){unlockAch('heart_grab');}
+function achOnShieldBlock(){if(!_achShieldBlocked){_achShieldBlocked=true;unlockAch('shield_save');}}
+function achOnDamage(){_achBossDmgTaken=true;_achWaveDmgTaken=true;}
+function achOnDeath(){
+  _achDeaths++;
+  if(_achDeaths>=10)unlockAch('die_10');
+}
+function achOnWaveComplete(){
+  if(!_achWaveDmgTaken)unlockAch('no_miss_wave');
+  _achWaveDmgTaken=false;
+  const waveNum=curWave||1;
+  if(waveNum>=5)unlockAch('wave5');
+}
+function achOnLevelComplete(lvl){
+  if(lvl>=10) unlockAch('level_10');
+  if(lvl>=30) unlockAch('level_30');
+  if(lvl>=60) unlockAch('level_60');
+  if(lvl>=90) unlockAch('level_90');
+  if(lvl>=120)unlockAch('level_120');
+  if(lvl>=31) unlockAch('page2');
+  if(lvl>=61) unlockAch('page3');
+  if(lvl>=91) unlockAch('page4');
+  if(lvl>=121)unlockAch('page5');
+}
+function achOnBossDefeated(tier){
+  _achBossDmgTaken=false; // reset for checking
+  // Map tiers to boss achievements
+  const tierMap={0:'boss1',1:'boss2',2:'boss3',3:'boss4',4:'boss5',5:'boss6',6:'boss12',17:'boss_final'};
+  // Check necroplastic (tier 18)
+  if(tier===18)unlockAch('boss18');
+  if(tier===29)unlockAch('boss_final');
+  const achId=tierMap[tier];
+  if(achId)unlockAch(achId);
+  if(!_achBossDmgTaken)unlockAch('no_dmg_boss');
+}
+function achOnScore(s){
+  if(s>=10000)  unlockAch('score_10k');
+  if(s>=100000) unlockAch('score_100k');
+  if(s>=1000000)unlockAch('score_1m');
+}
+function achOnCheat(){unlockAch('cheat_user');}
+function doResetProgress(){
+  // Unlock the fresh start achievement FIRST before wiping
+  unlockAch('fresh_start');
+  const freshAch={fresh_start:achUnlocked['fresh_start']};
+  achUnlocked=freshAch;saveAch();
+  STATS={...DEFAULT_STATS,killsByType:{...DEFAULT_STATS.killsByType}};
+  saveStats();
+  maxUnlocked=1;
+  try{localStorage.setItem('tupperMaxLvl','1');}catch(_){}
+  try{localStorage.setItem('tupperScores','[]');}catch(_){}
+  highScores=[];renderSB();
+  curLevel=1;
+  buildLvlGrid();
+  // Hide reset overlay
+  document.getElementById('reset-confirm-overlay').style.display='none';
+  document.getElementById('reset-step1').style.display='flex';
+  document.getElementById('reset-step2').style.display='none';
+  // Show a brief confirmation flash
+  const toast=document.getElementById('ach-toast');
+  const icon=document.getElementById('ach-toast-icon');
+  const name=document.getElementById('ach-toast-name');
+  if(toast&&icon&&name){
+    icon.textContent='🔄';name.textContent='Progress Reset!';
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),2500);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════════
+const DEFAULT_STATS={
+  totalKills:0, totalDeaths:0, totalShots:0, totalDamageDealt:0,
+  totalLevelsCompleted:0, totalBossesDefeated:0, totalLaserKills:0,
+  totalHeartsCollected:0, highestLevel:1, highestScore:0,
+  killsByType:{basic:0,armor:0,speedy:0,tank:0,bomber:0,ghost:0},
+  totalPlayTime:0, // seconds
+  totalWavesCleared:0, totalShieldsBlocked:0,
+};
+let STATS={...DEFAULT_STATS,killsByType:{...DEFAULT_STATS.killsByType}};
+try{
+  const s=JSON.parse(localStorage.getItem('tupperStats')||'{}');
+  STATS={...DEFAULT_STATS,...s,killsByType:{...DEFAULT_STATS.killsByType,...(s.killsByType||{})}};
+}catch(_){}
+let _statsPlayStart=Date.now();
+function saveStats(){
+  STATS.totalPlayTime+=Math.floor((Date.now()-_statsPlayStart)/1000);
+  _statsPlayStart=Date.now();
+  try{localStorage.setItem('tupperStats',JSON.stringify(STATS));}catch(_){}
+}
+function buildStatsGrid(){
+  const g=document.getElementById('stats-grid');if(!g)return;
+  const kt=STATS.killsByType;
+  const rows=[
+    ['⚔️','Total Kills',STATS.totalKills.toLocaleString()],
+    ['💀','Total Deaths',STATS.totalDeaths.toLocaleString()],
+    ['💥','Total Damage Dealt',STATS.totalDamageDealt.toLocaleString()],
+    ['🔫','Total Shots Fired',STATS.totalShots.toLocaleString()],
+    ['⚡','Laser Kills',STATS.totalLaserKills.toLocaleString()],
+    ['🏆','Bosses Defeated',STATS.totalBossesDefeated],
+    ['🌊','Waves Cleared',STATS.totalWavesCleared],
+    ['🎯','Levels Completed',STATS.totalLevelsCompleted],
+    ['💎','Highest Level',STATS.highestLevel],
+    ['💰','Highest Score',STATS.highestScore.toLocaleString()],
+    ['❤️','Hearts Collected',STATS.totalHeartsCollected],
+    ['🛡️','Shield Blocks',STATS.totalShieldsBlocked],
+    ['🟢','Basic Kills',kt.basic.toLocaleString()],
+    ['⚙️','Armor Kills',kt.armor.toLocaleString()],
+    ['🟠','Speedy Kills',kt.speedy.toLocaleString()],
+    ['🔴','Tank Kills',kt.tank.toLocaleString()],
+    ['💣','Bomber Kills',kt.bomber.toLocaleString()],
+    ['👻','Ghost Kills',kt.ghost.toLocaleString()],
+    ['⏱️','Total Play Time',Math.floor(STATS.totalPlayTime/60)+'m '+STATS.totalPlayTime%60+'s'],
+  ];
+  g.innerHTML=rows.map(([icon,label,val])=>
+    `<div class="stat-card"><div class="stat-icon">${icon}</div><div class="stat-label">${label}</div><div class="stat-value">${val}</div></div>`
+  ).join('');
+}
+
 let maxUnlocked=1;
 try{maxUnlocked=Math.max(1,parseInt(localStorage.getItem('tupperMaxLvl')||'1'));}catch(_){}
 function unlock(lvl){if(lvl>maxUnlocked){maxUnlocked=lvl;try{localStorage.setItem('tupperMaxLvl',String(maxUnlocked));}catch(_){}}}
+function applyCheatUnlockAll(){if(CHEATS.unlockAll)maxUnlocked=150;}
 
 // ═══════════════════════════════════════════════════
-//  LEVEL CONFIG — 30 levels, boss every 5th
+//  LEVEL CONFIG — 90 levels, boss every 5th
 // ═══════════════════════════════════════════════════
+const MAX_LEVEL=150;
+// Section names for each page of 30 levels
+const SECTION_NAMES=[
+  'THE PLASTIC WARS',      // levels  1-30
+  'VOID SECTOR',           // levels 31-60
+  'ANTIMATTER DIMENSION',  // levels 61-90
+  'REALM OF THE DEAD',     // levels 91-120
+  'THE PRIMORDIAL ABYSS',  // levels 121-150
+];
+// Individual level flavor names (catchy, 5 for each group of 5 levels before a boss)
+const LEVEL_NAMES=[
+  // Page 1: levels 1-30
+  'Lid Wars','Seal Patrol','Container Chaos','Tupperware Terror','LID KING RISES',
+  'Arctic Assault','Ice Storm','Frozen Front','Blizzard Brigade','FROSTLOCK FALLS',
+  'Heat Seekers','Steam Brigade','Boiling Point','Burn Patrol','SAUCEPAN SAM STRIKES',
+  'Cold Storage','Chill Division','Frost Patrol','Ice Barrage','CRISPER LORD COMMANDS',
+  'Thermos Corps','Flask Front','Heat Flask','Burn Unit','THERMOS PRIME ATTACKS',
+  'Star Spawn','Nova Guard','Supernova Eve','Final Seal','SUPERNOVA TUPPERWARE',
+  // Page 2: levels 31-60
+  'Void Scouts','Dark Matter Recon','Shadow Patrol','Abyss Crawlers','VOID LUNCHBOX OPENS',
+  'Colander Corps','Hole Division','Drain Squad','Leak Force','COLANDER OF DOOM RISES',
+  'Blade Runners','Razor Edge','Spin Cycle','Slice Division','BLENDER KING REIGNS',
+  'Pyrex Force','Inferno Rank','Heatproof Guard','Flame Core','PYREX OVERLORD BURNS',
+  'Lock Down','Sealed Squad','Omega Guard','Pressurized','TUPPERLOCK OMEGA SEALS',
+  'Depth Charge','Abyss Patrol','Filter Force','Drain Guard','ABYSS STRAINER FILTERS',
+  // Page 3: levels 61-90
+  'Antimatter Scouts','Dark Wave','Matter Rift','Dimension Breach','ANTIMATTER CASSEROLE',
+  'Gravity Corps','Warp Division','Crush Patrol','Singularity Guard','GRAVITON FLASK BENDS',
+  'Pressure Corps','Steam Core','Explosion Eve','Critical Mass','OMEGA PRESSURE COOKER',
+  'Event Horizon','Collapse Zone','Singularity Eve','Zero Point','THE SINGULARITY POT',
+  'Dark Patrol','Void Matter','Shadow Corps','Obsidian Guard','DARK MATTER DECANTER',
+  'Eternal Scout','Forever Front','Timeless Guard','Undying Corps','THE ETERNAL TUPPERWARE',
+  // Page 4: levels 91-120
+  'Necro Scouts','Dead Parade','Undead Corps','Bone Brigade','THE NECROPLASTIC RISES',
+  'Century Guard','Milestone Division','Legacy Corps','Veteran Squad','CENTENNIAL CANISTER',
+  'Plasma Scouts','Ion Division','Charge Corps','Bolt Brigade','THE PLASMA PITCHER',
+  'Depth Divers','Abyssal Guard','Deep Patrol','Trench Corps','ABYSSAL LUNCH PAIL',
+  'Fractal Guard','Pattern Corps','Infinite Scout','Repeat Division','THE FRACTAL FLASK',
+  'Final Meal Corps','Last Supper Guard','Oblivion Eve','Oblivion Patrol','OBLIVION BENTO',
+  // Page 5: levels 121-150
+  'Dread Division','Terror Corps','Fear Patrol','Horror Guard','THE DREAD DECANTER',
+  'Cosmic Corps','Star Patrol','Universe Guard','Galaxy Division','COSMIC CRISPER',
+  'Void Cage Division','Dimensional Trap','Infinite Prison','Void Warden','VOID CASSEROLE',
+  'Entropy Scouts','Decay Division','Collapse Corp','Ruin Guard','ENTROPY ENGINE',
+  'Omega Division','Final Holes','All Vents','Last Barrage','THE OMEGA COLANDER',
+  'Ancient Scout','Primeval Division','Before Time Guard','Genesis Corps','THE PRIMORDIAL TUPPERWARE',
+];
+function getLevelName(lvl){return LEVEL_NAMES[Math.min(lvl-1,LEVEL_NAMES.length-1)]||'LEVEL '+lvl;}
+function getSectionName(lvl){return SECTION_NAMES[Math.floor((lvl-1)/30)]||'BEYOND';}
 function lcfg(lvl){
-  const boss=(lvl%5===0); // boss spawns AFTER waves on these levels
-  const rows=Math.min(2+Math.floor((lvl-1)/4),5);
-  const cols=Math.min(6+Math.floor((lvl-1)/5),11);
+  const boss=(lvl%5===0);
+  const rows=Math.min(2+Math.floor((lvl-1)/4),6);
+  const cols=Math.min(6+Math.floor((lvl-1)/5),12);
   const eHp=Math.max(1,Math.floor(1+(lvl-1)/5));
-  const bHp=Math.floor(35+lvl*10);
-  // Start at 3 waves (level 1), add 1 wave every 3 levels, cap at 8
-  const waves=Math.min(3+Math.floor((lvl-1)/3),8);
-  const eMov=0.35+lvl*.05;
-  const eFire=Math.min(0.22,0.06+lvl*.006);
+  const bHp=Math.floor(35+lvl*12);
+  const waves=Math.min(3+Math.floor((lvl-1)/3),10);
+  const eMov=0.35+lvl*.04;
+  const eFire=Math.min(0.28,0.06+lvl*.005);
   const bLaser=lvl>=8;
   const types=Math.min(1+Math.floor(lvl/5),6);
   return{boss,rows,cols,eHp,bHp,waves,eMov,eFire,bLaser,types};
@@ -689,12 +1281,14 @@ const ETYPES=[
 // ═══════════════════════════════════════════════════
 //  GAME STATE
 // ═══════════════════════════════════════════════════
-let score=0,lives=3,shields=0,curWave=1,curLevel=1,waveTarget=1,running=false,paused=false,animId;
+let score=0,levelStartScore=0,lives=3,shields=0,curWave=1,curLevel=1,waveTarget=1,running=false,paused=false,animId;
 let player=null,bullets=[],eBullets=[],enemies=[],particles=[],shootCD=0,eDir=1,eMoveT=0;
 const LF=180,LCD_BASE=600;
 let _laserCDMax=LCD_BASE;
 let lOn=false,lFrames=0,lCD=0,lDmgT=0;
 let boss=null,bossUp=false,bossOut=false,bLaserOn=false,bLaserX=0,bLaserT=0,bLaserCD=0;
+let heartDrops=[]; // {x,y,vy,r} collectible hearts
+let floatTexts=[]; // {x,y,vy,al,txt,col} floating score numbers
 let bossCountdownTO=null;
 let waveTransition=false; // guard: stops wave-complete firing every frame
 let waveTO=null; // tracks wave transition timeout so it can be cancelled
@@ -704,20 +1298,30 @@ const BUBBLE_DUR=180,BUBBLE_CD_MAX=600; // 3s active, 10s cooldown at 60fps
 let bubbleOn=false,bubbleFrames=0,bubbleCD=0;
 // Boss phase 2
 let bossPhase=1,cutscenePlaying=false;
+let _lastTime=0; // for delta-time
+// ── CHEAT STATE ──────────────────────────────────────────────
+let cheatUnlocked=false; // has code 5529 been entered
+const CHEATS={unlockAll:false,infHealth:false,infPower:false,megaDmg:false};
+function anyCheatsOn(){return CHEATS.unlockAll||CHEATS.infHealth||CHEATS.infPower||CHEATS.megaDmg;}
+// ── AUDIO SETTINGS ───────────────────────────────────────────
+let audioMuted=false;
+let audioVol=0.30;
 
 // ═══════════════════════════════════════════════════
 //  INPUT
 // ═══════════════════════════════════════════════════
-const K={},TK={left:false,right:false,fire:false,laser:false,shield:false,pause:false};
+const K={},TK={left:false,right:false,up:false,down:false,fire:false,laser:false,shield:false,pause:false};
 document.addEventListener('keydown',e=>{
   K[e.code]=true;
   if(e.code==='KeyP'||e.code==='Escape'){e.preventDefault();doPause();return;}
   if(!running||paused)return;
   if(e.code==='Space'){e.preventDefault();doShoot();}
+  if(e.code==='ArrowUp'||e.code==='KeyW'){e.preventDefault();K.up=true;}
+  if(e.code==='ArrowDown'||e.code==='KeyS'){e.preventDefault();K.down=true;}
   if(e.code==='KeyX'||e.code==='KeyQ'){e.preventDefault();doLaser();}
-  if(e.code==='KeyB'){e.preventDefault();if(running&&!paused)doBubble();}
+  if(e.code==='KeyE'){e.preventDefault();if(running&&!paused)doBubble();}
 });
-document.addEventListener('keyup',e=>K[e.code]=false);
+document.addEventListener('keyup',e=>{K[e.code]=false;if(e.code==='ArrowUp'||e.code==='KeyW')K.up=false;if(e.code==='ArrowDown'||e.code==='KeyS')K.down=false;});
 const BP={};
 function mkBtn(id,prop,cb){
   const el=document.getElementById(id);if(!el)return;
@@ -746,6 +1350,7 @@ document.getElementById('quit-btn').addEventListener('click',()=>{
   document.getElementById('hud-bar').style.display='none';
   document.getElementById('main-menu').classList.remove('hidden');
   resizeCanvas();
+  setTimeout(startMMMusic,300);
 });
 // cb-pause is wired via wireCanvasBtn below
 document.getElementById('pause-btn').addEventListener('click',()=>{if(running)doPause();});
@@ -761,16 +1366,22 @@ document.querySelectorAll('.dbtn').forEach(b=>{
 });
 
 // ═══════════════════════════════════════════════════
-//  LEVELS GRID
+//  LEVELS GRID — 3 pages × 30 levels
 // ═══════════════════════════════════════════════════
+let lvlPage=0; // 0=1-30 … 4=121-150
 function buildLvlGrid(){
+  applyCheatUnlockAll();
   const g=document.getElementById('lvl-grid');g.innerHTML='';
-  for(let i=1;i<=30;i++){
+  const start=lvlPage*30+1;
+  const end=start+29;
+  for(let i=start;i<=end;i++){
     const isBoss=(i%5===0);
     const cell=document.createElement('div');
     let cls='lc'+(isBoss?' boss':'')+(i===curLevel?' cur':i<=maxUnlocked?' open':'');
     cell.className=cls;
-    cell.textContent=(isBoss?'[B] ':'')+'L'+i;
+    // Page label: show tier for boss levels
+    const bossNum=isBoss?Math.ceil(i/5):0;
+    cell.textContent=(isBoss?'★':'')+'L'+i;
     if(i<=maxUnlocked){
       cell.addEventListener('click',()=>{
         document.getElementById('levels-modal').classList.remove('show');
@@ -779,15 +1390,39 @@ function buildLvlGrid(){
     }
     g.appendChild(cell);
   }
+  // Update page indicator
+  const pi=document.getElementById('lvl-page-indicator');
+  if(pi)pi.textContent='PAGE '+(lvlPage+1)+'/5  ·  LEVELS '+(lvlPage*30+1)+'-'+(lvlPage*30+30);
+  const pb=document.getElementById('lvl-page-prev');
+  const pf=document.getElementById('lvl-page-next');
+  if(pb)pb.disabled=lvlPage===0;
+  if(pf)pf.disabled=lvlPage===4;
 }
 document.getElementById('levels-btn').addEventListener('click',()=>{buildLvlGrid();document.getElementById('levels-modal').classList.add('show');});
-document.getElementById('lvl-close').addEventListener('click',()=>document.getElementById('levels-modal').classList.remove('show'));
+// Auto-jump to the page containing curLevel
+function openLevelSelectAtCurrent(){
+  lvlPage=Math.floor((curLevel-1)/30);
+  buildLvlGrid();
+  document.getElementById('levels-modal').classList.add('show');
+}
+// Pagination wiring (buttons added in HTML)
+document.addEventListener('click',e=>{
+  if(e.target.id==='lvl-page-prev'&&lvlPage>0){lvlPage--;buildLvlGrid();}
+  if(e.target.id==='lvl-page-next'&&lvlPage<4){lvlPage++;buildLvlGrid();}
+});
+document.getElementById('lvl-close').addEventListener('click',()=>{sfxMenuBack();
+  document.getElementById('levels-modal').classList.remove('show');
+  // If game isn't running and main menu is hidden, show main menu
+  if(!running && document.getElementById('main-menu').classList.contains('hidden')){
+    document.getElementById('main-menu').classList.remove('hidden');
+  }
+});
 
 // ═══════════════════════════════════════════════════
 //  BEGIN LEVEL
 // ═══════════════════════════════════════════════════
 function beginLevel(lvl){
-  ga();
+  ga();stopMMMusic();
   // Clear any pending timers from previous game
   if(bossCountdownTO){clearTimeout(bossCountdownTO);bossCountdownTO=null;}
   if(waveTO){clearTimeout(waveTO);waveTO=null;}
@@ -796,18 +1431,20 @@ function beginLevel(lvl){
   const cfg=lcfg(lvl);
   const dm=DIFFS[diff];
   // score persists across game overs
+  levelStartScore=score; // remember score when level begins
   lives=5;shields=0;curWave=1;waveTarget=cfg.waves;
   paused=false;bLaserOn=false;bLaserCD=0;bLaserT=0;
   updateHUD();
 
   player={x:GW/2-32,y:GH-90,w:64,h:55,spd:7*dm.pSpd};
-  bullets=[];eBullets=[];enemies=[];particles=[];
+  bullets=[];eBullets=[];enemies=[];particles=[];heartDrops=[];floatTexts=[];
   shootCD=0;eDir=1;eMoveT=0;
   lOn=false;lFrames=0;lCD=0;lDmgT=0;_laserCDMax=LCD_BASE;
   bubbleOn=false;bubbleFrames=0;bubbleCD=0;
   bossPhase=1;cutscenePlaying=false;
   boss=null;bossUp=false;bossOut=false;
   waveTransition=false;
+  _lastTime=0; // reset dt timer on new level
 
   document.getElementById('controls').style.display='flex';
   document.getElementById('hint').style.display='none';
@@ -815,10 +1452,76 @@ function beginLevel(lvl){
   document.getElementById('main-menu').classList.add('hidden');
   hideMsg();
 
-  spawnWave(); // always start with enemy waves; boss triggered after all waves clear
-  running=true;cancelAnimationFrame(animId);resizeCanvas();
-  animId=requestAnimationFrame(loop);
-  startBGM();
+  // Show level intro countdown
+  showLevelIntro(lvl, ()=>{
+    spawnWave();
+    running=true;cancelAnimationFrame(animId);
+    requestAnimationFrame(()=>requestAnimationFrame(resizeCanvas));
+    animId=requestAnimationFrame(loop);
+    startBGM();
+  });
+}
+
+function showLevelIntro(lvl, onDone){
+  const el=document.getElementById('level-intro');
+  const bg=document.getElementById('level-intro-bg');
+  const secEl=document.getElementById('li-section');
+  const lvlEl=document.getElementById('li-level');
+  const nameEl=document.getElementById('li-name');
+  const cdEl=document.getElementById('li-countdown');
+  if(!el){onDone();return;}
+
+  // Set text
+  secEl.textContent='— '+getSectionName(lvl)+' —';
+  lvlEl.textContent='LEVEL '+lvl;
+  nameEl.textContent=getLevelName(lvl);
+
+  // Show overlay
+  el.classList.add('show');
+  bg.style.opacity='0.92';
+
+  // Animate in
+  setTimeout(()=>{
+    secEl.style.opacity='1';secEl.style.transform='translateY(0)';
+  },50);
+  setTimeout(()=>{
+    lvlEl.style.opacity='1';lvlEl.style.transform='scale(1)';
+  },180);
+  setTimeout(()=>{nameEl.style.opacity='1';},350);
+
+  // Countdown 3-2-1
+  let cd=3;
+  cdEl.textContent=cd;
+  setTimeout(()=>cdEl.style.opacity='1',500);
+
+  function tick(){
+    cd--;
+    if(cd>0){
+      cdEl.style.opacity='0';
+      setTimeout(()=>{cdEl.textContent=cd;cdEl.style.opacity='1';},150);
+      setTimeout(tick,1000);
+    } else {
+      cdEl.style.opacity='0';
+      // Quick flash white then out
+      setTimeout(()=>{
+        cdEl.textContent='GO!';cdEl.style.opacity='1';
+        cdEl.style.color='#00ff88';cdEl.style.textShadow='0 0 30px #00ff88';
+      },150);
+      setTimeout(()=>{
+        // Fade out overlay
+        bg.style.transition='opacity .3s';bg.style.opacity='0';
+        secEl.style.opacity='0';lvlEl.style.opacity='0';nameEl.style.opacity='0';cdEl.style.opacity='0';
+        setTimeout(()=>{
+          el.classList.remove('show');
+          cdEl.style.color='';cdEl.style.textShadow='';
+          secEl.style.transform='translateY(-12px)';lvlEl.style.transform='scale(.8)';
+          bg.style.transition='';
+          onDone();
+        },350);
+      },700);
+    }
+  }
+  setTimeout(tick,1500);
 }
 
 function updateHUD(){
@@ -861,23 +1564,55 @@ function updateHUD(){
 //  SPAWN WAVE / BOSS
 // ═══════════════════════════════════════════════════
 function spawnWave(){
-  if(bossCountdownTO||bossUp||bossOut)return; // no re-spawn during boss
-  waveTransition=false; // clear transition lock when new wave actually spawns
-  bossUp=false;bossOut=false;boss=null;enemies=[];eBullets=[];
+  if(bossCountdownTO||bossUp||bossOut)return;
+  waveTransition=false;
+  bossUp=false;bossOut=false;boss=null;enemies=[];eBullets=[];heartDrops=[];floatTexts=[];
   const cfg=lcfg(curLevel);const dm=DIFFS[diff];
   const{rows,cols,eHp,eMov,eFire,types}=cfg;
   const xGap=Math.floor((GW-80)/cols),yGap=54;
 
+  // Determine boss theme for pre-boss levels (levels N-4..N-1 before boss at N)
+  // nextBossLevel = next multiple of 5 >= curLevel
+  const nextBoss=curLevel%5===0?curLevel:curLevel+5-(curLevel%5);
+  const bTier=Math.min(Math.ceil(nextBoss/5)-1,BOSS_DEFS.length-1);
+  const bd=BOSS_DEFS[bTier];
+  // Only theme if within 4 levels of a boss
+  const preBoss=(curLevel%5!==0)&&(nextBoss-curLevel<=4)&&bd.themeCol;
+
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
-      // Assign type: cycle through available types in a pattern
       const ti=Math.min((r*2+Math.floor(c/3))%types, ETYPES.length-1);
       const et=ETYPES[ti];
       const hp=Math.max(1,Math.round(eHp*et.hpMult));
+
+      // Apply boss theme tinting: blend base color toward boss theme
+      // Row 0 = fully themed, deeper rows = less themed (variety)
+      let col=et.col,drk=et.drk,lit=et.lit;
+      if(preBoss){
+        // Each row gets its own shade of the boss palette for visual variety
+        const shades=[bd.themeCol,bd.themeDrk,bd.themeLit,bd.themeCol,bd.themeDrk,bd.themeLit];
+        const drkShades=[bd.themeDrk,bd.themeCol,bd.themeDrk,bd.themeDrk,bd.themeCol,bd.themeDrk];
+        const litShades=[bd.themeLit,bd.themeLit,bd.themeCol,bd.themeLit,bd.themeLit,bd.themeCol];
+        col=shades[r%shades.length];
+        drk=drkShades[r%drkShades.length];
+        lit=litShades[r%litShades.length];
+      }
+
+      // Compute non-overlapping position using grid layout + jitter
+      let ex=40+c*xGap, ey=50+r*yGap;
+      // Ensure no overlap with existing enemies
+      let tries=0;
+      while(tries<8){
+        let ok=true;
+        for(const oe of enemies){
+          if(Math.abs(ex-oe.x)<et.w+2&&Math.abs(ey-oe.y)<et.h+2){ok=false;ex=40+c*xGap+(Math.random()*6-3);break;}
+        }
+        if(ok)break;tries++;
+      }
       enemies.push({
-        x:40+c*xGap, y:50+r*yGap,
+        x:ex, y:ey,
         w:et.w, h:et.h,
-        col:et.col, drk:et.drk, lit:et.lit,
+        col, drk, lit,
         ti, hp, maxHp:hp,
         sT:Math.floor(50+Math.random()*100),
         sMul:et.spdMult, fMul:et.fireMult,
@@ -890,26 +1625,133 @@ function spawnWave(){
 const BOSS_DEFS=[
   {name:'THE LID KING',  emoji:'[K]', color:'#cc6600', titleColor:'#ff9900',
    desc:'Ruler of all containers',
-   special:'lid_slam', specialName:'LID SLAM', specialCD:280},
+   special:'lid_slam', specialName:'LID SLAM', specialCD:280, themeCol:'#ff8800',themeDrk:'#884400',themeLit:'#ffcc44'},
   {name:'FROSTLOCK',     emoji:'[F]', color:'#0088cc', titleColor:'#88ddff',
    desc:'Frozen in hatred',
-   special:'ice_ring',  specialName:'ICE RING',  specialCD:240},
+   special:'ice_ring',  specialName:'ICE RING',  specialCD:240, themeCol:'#44ddff',themeDrk:'#005577',themeLit:'#aaffff'},
   {name:'SAUCEPAN SAM',  emoji:'[S]', color:'#884400', titleColor:'#ffaa44',
    desc:'Boiling with rage',
-   special:'heat_wave', specialName:'HEAT WAVE', specialCD:200},
+   special:'heat_wave', specialName:'HEAT WAVE', specialCD:200, themeCol:'#ff5500',themeDrk:'#662200',themeLit:'#ffaa44'},
   {name:'CRISPER LORD',  emoji:'[C]', color:'#004488', titleColor:'#4499ff',
    desc:'Master of the vegetable drawer',
-   special:'laser',     specialName:'TWIN BEAM', specialCD:160},
+   special:'laser',     specialName:'TWIN BEAM', specialCD:160, themeCol:'#4499ff',themeDrk:'#002266',themeLit:'#aaccff'},
   {name:'THERMOS PRIME', emoji:'[T]', color:'#880000', titleColor:'#ff4444',
    desc:'Forged in the microwave',
-   special:'barrage',   specialName:'BARRAGE',   specialCD:140},
+   special:'barrage',   specialName:'BARRAGE',   specialCD:140, themeCol:'#ff2244',themeDrk:'#660011',themeLit:'#ff88aa'},
   {name:'SUPERNOVA TUPPERWARE', emoji:'[★]', color:'#0a0015', titleColor:'#ff00ff',
    glowColor:'#aa00ff', textColor:'#ffffff', sparkColor:'#ff88ff',
    desc:'Born from a dying star. Cannot be contained.',
-   special:'all', specialName:'ANNIHILATION', specialCD:100},
+   special:'all', specialName:'ANNIHILATION', specialCD:100, themeCol:'#cc00ff',themeDrk:'#440077',themeLit:'#ff88ff'},
+
+  // ── TIER 6 — Level 35 ──
+  {name:'VOID LUNCHBOX',    emoji:'[V]', color:'#050010', titleColor:'#8800ff',
+   glowColor:'#6600cc', desc:'It devours light itself.',
+   special:'void_pull',  specialName:'VOID PULL',    specialCD:180, themeCol:'#8800ff',themeDrk:'#330066',themeLit:'#cc88ff'},
+  // ── TIER 7 — Level 40 ──
+  {name:'COLANDER OF DOOM', emoji:'[D]', color:'#1a0000', titleColor:'#ff2200',
+   glowColor:'#cc1100', desc:'Every hole fires.',
+   special:'hole_burst', specialName:'HOLE BURST',   specialCD:160, themeCol:'#ff2200',themeDrk:'#770000',themeLit:'#ff8866'},
+  // ── TIER 8 — Level 45 ──
+  {name:'THE BLENDER KING', emoji:'[B]', color:'#001520', titleColor:'#00ddff',
+   glowColor:'#0088cc', desc:'It will liquefy your soul.',
+   special:'blade_spin',  specialName:'BLADE SPIN',   specialCD:150, themeCol:'#00ddff',themeDrk:'#004466',themeLit:'#88eeff'},
+  // ── TIER 9 — Level 50 ──
+  {name:'PYREX OVERLORD',   emoji:'[P]', color:'#100000', titleColor:'#ff6600',
+   glowColor:'#ff3300', desc:'Survived every oven. Every time.',
+   special:'heat_cage',  specialName:'HEAT CAGE',    specialCD:140, themeCol:'#ff6600',themeDrk:'#662200',themeLit:'#ffaa55'},
+  // ── TIER 10 — Level 55 ──
+  {name:'TUPPERLOCK OMEGA', emoji:'[Ω]', color:'#000a00', titleColor:'#00ff44',
+   glowColor:'#00cc33', desc:'Sealed beyond all reason.',
+   special:'seal_burst', specialName:'SEAL BURST',   specialCD:130, themeCol:'#00ff44',themeDrk:'#004422',themeLit:'#88ffaa'},
+  // ── TIER 11 — Level 60 ──
+  {name:'THE ABYSS STRAINER',emoji:'[A]', color:'#000018', titleColor:'#4444ff',
+   glowColor:'#2222cc', desc:'It filters out hope.',
+   special:'abyss_rain', specialName:'ABYSS RAIN',   specialCD:120, themeCol:'#4444ff',themeDrk:'#111155',themeLit:'#8888ff'},
+
+  // ── TIER 12 — Level 65 ──
+  {name:'ANTIMATTER CASSEROLE',emoji:'[X]', color:'#0a000a', titleColor:'#ff00aa',
+   glowColor:'#cc0088', desc:'It exists between dimensions.',
+   special:'matter_wave',specialName:'MATTER WAVE',  specialCD:115, themeCol:'#ff00aa',themeDrk:'#550044',themeLit:'#ff88dd'},
+  // ── TIER 13 — Level 70 ──
+  {name:'GRAVITON FLASK',   emoji:'[G]', color:'#00000a', titleColor:'#aaffff',
+   glowColor:'#55eeee', desc:'Bends space around itself.',
+   special:'grav_crush', specialName:'GRAV CRUSH',   specialCD:110, themeCol:'#aaffff',themeDrk:'#004455',themeLit:'#ddffff'},
+  // ── TIER 14 — Level 75 ──
+  {name:'OMEGA PRESSURE COOKER',emoji:'[O]',color:'#100005',titleColor:'#ff5500',
+   glowColor:'#dd3300', desc:'Built up pressure for 1000 years.',
+   special:'pressure_burst',specialName:'PRESSURE BURST',specialCD:105, themeCol:'#ff5500',themeDrk:'#551100',themeLit:'#ffaa55'},
+  // ── TIER 15 — Level 80 ──
+  {name:'THE SINGULARITY POT',emoji:'[S2]',color:'#000008',titleColor:'#ffffff',
+   glowColor:'#aaaaff', desc:'All matter ends here.',
+   special:'singularity',specialName:'SINGULARITY',  specialCD:100, themeCol:'#ffffff',themeDrk:'#333366',themeLit:'#ccccff'},
+  // ── TIER 16 — Level 85 ──
+  {name:'DARK MATTER DECANTER',emoji:'[DM]',color:'#030003',titleColor:'#ff44ff',
+   glowColor:'#cc00cc', desc:'Contains the end of everything.',
+   special:'dark_storm', specialName:'DARK STORM',   specialCD:95,  themeCol:'#ff44ff',themeDrk:'#550055',themeLit:'#ffaaff'},
+  // ── TIER 17 — Level 90 ──
+  {name:'THE ETERNAL TUPPERWARE',emoji:'[∞]',color:'#000000',titleColor:'#ffff00',
+   glowColor:'#ffaa00', textColor:'#ffffff', sparkColor:'#ffff88',
+   desc:'It was here before the universe. It will be here after.',
+   special:'eternal',    specialName:'ETERNAL WRATH', specialCD:85,  themeCol:'#ffff00',themeDrk:'#555500',themeLit:'#ffff88'},
+
+  // ══ PAGE 4: LEVELS 91-120 ══  (tiers 18-23)
+
+  // TIER 18 — Level 95
+  {name:'THE NECROPLASTIC',    emoji:'[N]',  color:'#050000', titleColor:'#ff0000',
+   glowColor:'#cc0000', desc:'Dead and unbreakable.',
+   special:'necro_grid',   specialName:'NECRO GRID',      specialCD:80,  themeCol:'#ff0000',themeDrk:'#550000',themeLit:'#ff6666'},
+  // TIER 19 — Level 100
+  {name:'CENTENNIAL CANISTER', emoji:'[C2]', color:'#000000', titleColor:'#ffaa00',
+   glowColor:'#ff8800', desc:'100 years of hatred. Freshness sealed in.',
+   special:'century_rage', specialName:'CENTURY RAGE',    specialCD:78,  themeCol:'#ffaa00',themeDrk:'#553300',themeLit:'#ffdd88'},
+  // TIER 20 — Level 105
+  {name:'THE PLASMA PITCHER',  emoji:'[PP]', color:'#00000a', titleColor:'#ff66ff',
+   glowColor:'#dd00dd', desc:'Contains only pure destruction.',
+   special:'plasma_burst', specialName:'PLASMA BURST',    specialCD:75,  themeCol:'#ff66ff',themeDrk:'#550055',themeLit:'#ffbbff'},
+  // TIER 21 — Level 110
+  {name:'ABYSSAL LUNCH PAIL',  emoji:'[AL]', color:'#000008', titleColor:'#00ffff',
+   glowColor:'#00cccc', desc:'Depths unknown. Contents lethal.',
+   special:'abyssal_wave', specialName:'ABYSSAL WAVE',    specialCD:72,  themeCol:'#00ffff',themeDrk:'#004444',themeLit:'#88ffff'},
+  // TIER 22 — Level 115
+  {name:'THE FRACTAL FLASK',   emoji:'[FF]', color:'#080008', titleColor:'#88ff88',
+   glowColor:'#44cc44', desc:'Every pattern repeats. Every shot is final.',
+   special:'fractal_ring', specialName:'FRACTAL RING',    specialCD:70,  themeCol:'#88ff88',themeDrk:'#224422',themeLit:'#ccffcc'},
+  // TIER 23 — Level 120
+  {name:'OBLIVION BENTO',      emoji:'[OB]', color:'#020002', titleColor:'#ff8800',
+   glowColor:'#cc6600', textColor:'#ffffff', sparkColor:'#ffbb44',
+   desc:'The last meal. Ever.',
+   special:'oblivion',     specialName:'OBLIVION BLAST',  specialCD:65,  themeCol:'#ff8800',themeDrk:'#442200',themeLit:'#ffcc66'},
+
+  // ══ PAGE 5: LEVELS 121-150 ══  (tiers 24-29)
+
+  // TIER 24 — Level 125
+  {name:'THE DREAD DECANTER',  emoji:'[DD]', color:'#040000', titleColor:'#ff3333',
+   glowColor:'#bb0000', desc:'Poured from the edge of reality.',
+   special:'dread_rain',   specialName:'DREAD RAIN',      specialCD:62,  themeCol:'#ff3333',themeDrk:'#551111',themeLit:'#ff9999'},
+  // TIER 25 — Level 130
+  {name:'COSMIC CRISPER',      emoji:'[CC]', color:'#000404', titleColor:'#44ffdd',
+   glowColor:'#00ccaa', desc:'Keeps the cosmos fresh. Keeps you dead.',
+   special:'cosmic_cross', specialName:'COSMIC CROSS',    specialCD:60,  themeCol:'#44ffdd',themeDrk:'#004433',themeLit:'#aaffee'},
+  // TIER 26 — Level 135
+  {name:'THE VOID CASSEROLE',  emoji:'[VC]', color:'#030006', titleColor:'#aa88ff',
+   glowColor:'#7744cc', desc:'Baked at absolute zero.',
+   special:'void_cage',    specialName:'VOID CAGE',       specialCD:58,  themeCol:'#aa88ff',themeDrk:'#331155',themeLit:'#ddccff'},
+  // TIER 27 — Level 140
+  {name:'ENTROPY ENGINE',      emoji:'[EE]', color:'#060000', titleColor:'#ff6644',
+   glowColor:'#cc3300', desc:'Everything decays. You first.',
+   special:'entropy_storm',specialName:'ENTROPY STORM',   specialCD:55,  themeCol:'#ff6644',themeDrk:'#441100',themeLit:'#ffaa88'},
+  // TIER 28 — Level 145
+  {name:'THE OMEGA COLANDER',  emoji:'[OC]', color:'#000000', titleColor:'#ffffff',
+   glowColor:'#cccccc', desc:'Every hole in existence fires at once.',
+   special:'omega_holes',  specialName:'OMEGA HOLES',     specialCD:52,  themeCol:'#ffffff',themeDrk:'#222244',themeLit:'#ddddff'},
+  // TIER 29 — Level 150  *** THE TRUE FINAL BOSS ***
+  {name:'THE PRIMORDIAL TUPPERWARE', emoji:'[∞∞]', color:'#000000', titleColor:'#ff0000',
+   glowColor:'#ff0000', textColor:'#ffffff', sparkColor:'#ff8888',
+   desc:'Before the Big Bang, there was this. There is no after.',
+   special:'primordial',   specialName:'PRIMORDIAL FURY', specialCD:45,  themeCol:'#ff0000',themeDrk:'#330000',themeLit:'#ff4444'},
 ];
 
-function getTierIdx(){return Math.min(Math.ceil(curLevel/5)-1,5);}
+function getTierIdx(){return Math.min(Math.ceil(curLevel/5)-1,29);}
 
 function spawnBoss(){
   // Guard: don't spawn if already spawned
@@ -930,7 +1772,7 @@ function spawnBoss(){
     msgEl.style.color=tc;
     msgEl.style.textShadow=`3px 3px 0 #000, 0 0 28px ${gc}, 0 0 56px ${gc}66`;
     msgEl.style.borderColor=gc;
-    msgEl.style.background=bd.tier===5?'rgba(10,0,21,0.92)':'rgba(0,0,0,0.75)';
+    msgEl.style.background=(bd.tier>=5)?'rgba(10,0,21,0.92)':'rgba(0,0,0,0.75)';
     if(bd.tier===5){
       // SUPERNOVA TUPPERWARE — extra dramatic
       msgEl.style.fontSize='clamp(0.9rem,3.5vw,1.8rem)';
@@ -960,13 +1802,16 @@ function triggerBossCountdown(){
 // ═══════════════════════════════════════════════════
 //  SHOOTING
 // ═══════════════════════════════════════════════════
-function doShoot(){if(shootCD>0)return;bullets.push({x:player.x+player.w/2,y:player.y,vy:-16});shootCD=11;sfxShoot();}
+function doShoot(){if(shootCD>0)return;bullets.push({x:player.x+player.w/2,y:player.y,vy:-16});shootCD=11;STATS.totalShots++;sfxShoot();}
 function doLaser(){
   const dm=DIFFS[diff];
-  if(lOn||lCD>0)return;lOn=true;lFrames=LF;_laserCDMax=Math.floor(LCD_BASE*dm.lcdMult);lDmgT=0;sfxLaserStart();
+  if(lOn)return;
+  if(!CHEATS.infPower&&lCD>0)return; // skip CD check if cheat on
+  lOn=true;lFrames=LF;_laserCDMax=Math.floor(LCD_BASE*dm.lcdMult);lDmgT=0;sfxLaserStart();
 }
 function doBubble(){
-  if(bubbleOn||bubbleCD>0)return;
+  if(bubbleOn)return;
+  if(!CHEATS.infPower&&bubbleCD>0)return; // skip CD if cheat on
   bubbleOn=true;bubbleFrames=BUBBLE_DUR;
   sfxBubbleActivate();updateHUD();
 }
@@ -988,8 +1833,10 @@ function burst(x,y,col,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s
 
 function takeDmg(hearts){
   hearts=hearts||1;
-  if(bubbleOn)return; // invincible
-  if(shields>0){shields=Math.max(0,shields-1);sfxHit();updateHUD();return;}
+  if(bubbleOn){achOnDamage();achOnShieldBlock();STATS.totalShieldsBlocked++;return;} // invincible - shield block!
+  if(CHEATS.infHealth)return;
+  if(shields>0){shields=Math.max(0,shields-1);sfxHit();updateHUD();achOnDamage();return;}
+  achOnDamage();
   lives=Math.max(0,lives-hearts);updateHUD();sfxLoseLife();
   if(lives<=0)doGameOver();
 }
@@ -997,30 +1844,42 @@ function takeDmg(hearts){
 // ═══════════════════════════════════════════════════
 //  MAIN LOOP
 // ═══════════════════════════════════════════════════
-function loop(){
+function loop(now){
   if(!running||paused)return;
+  // ── Delta-time ──────────────────────────────────────────
+  if(!_lastTime)_lastTime=now;
+  const rawDt=Math.min((now-_lastTime)/1000,0.05); // seconds, capped at 50ms
+  const dt=rawDt*60; // scale to "60fps units" so existing speed values work
+  _lastTime=now;
   const cfg=lcfg(curLevel);const dm=DIFFS[diff];
 
-  // Player move
-  if((K.ArrowLeft||K.KeyA||TK.left)&&player.x>0)player.x-=player.spd;
-  if((K.ArrowRight||K.KeyD||TK.right)&&player.x+player.w<GW)player.x+=player.spd;
+  // Player move  (dt-scaled)
+  if((K.ArrowLeft||K.KeyA||TK.left)&&player.x>0)player.x-=player.spd*dt;
+  if((K.ArrowRight||K.KeyD||TK.right)&&player.x+player.w<GW)player.x+=player.spd*dt;
+  player.x=Math.max(0,Math.min(GW-player.w,player.x));
+  // Vertical movement: during boss fights player can move in bottom 55% of screen
+  const _yMin=bossUp?Math.floor(GH*0.45):Math.floor(GH*0.75);
+  const _yMax=GH-player.h-6;
+  if((K.up||K['ArrowUp']||K['KeyW']||TK.up)&&player.y>_yMin)player.y-=player.spd*dt;
+  if((K.down||K['ArrowDown']||K['KeyS']||TK.down)&&player.y<_yMax)player.y+=player.spd*dt;
+  player.y=Math.max(_yMin,Math.min(_yMax,player.y));
   if(TK.fire)doShoot();
-  if(shootCD>0)shootCD--;
+  if(shootCD>0)shootCD-=dt;
 
   // Laser
   if(lOn){
-    lFrames--;
-    laserDmg(player.x+player.w/2); // 1hp every frame
-    if(lFrames<=0){lOn=false;lCD=_laserCDMax;sfxLaserStop();}
-  }else if(lCD>0)lCD--;
+    lFrames-=dt;
+    laserDmg(player.x+player.w/2);
+    if(lFrames<=0){lOn=false;lCD=CHEATS.infPower?0:_laserCDMax;sfxLaserStop();}
+  }else if(lCD>0)lCD-=dt;
   updateLaserUI();
   // Bubble tick
-  if(bubbleOn){bubbleFrames--;if(bubbleFrames<=0){bubbleOn=false;bubbleCD=BUBBLE_CD_MAX;updateHUD();}}
-  else if(bubbleCD>0){bubbleCD--;if(bubbleCD%60===0)updateHUD();}
+  if(bubbleOn){bubbleFrames-=dt;if(bubbleFrames<=0){bubbleOn=false;bubbleCD=CHEATS.infPower?0:BUBBLE_CD_MAX;updateHUD();}}
+  else if(bubbleCD>0){bubbleCD-=dt;if(Math.floor(bubbleCD/60)!==Math.floor((bubbleCD+dt)/60))updateHUD();}
 
   // Enemy grid
   if(!bossUp){
-    eMoveT++;const mE=Math.max(8,28-Math.floor(curLevel/2));
+    eMoveT+=dt;const mE=Math.max(8,28-Math.floor(curLevel/2));
     if(eMoveT>=mE){
       eMoveT=0;let edge=false;
       const spd=cfg.eMov*dm.eMov*mE;
@@ -1028,14 +1887,14 @@ function loop(){
       if(edge){eDir*=-1;for(const e of enemies)e.y+=14;}
     }
     for(const e of enemies){
-      e.sT--;
+      e.sT-=dt;
       if(e.sT<=0){
         e.sT=Math.max(12,Math.floor((50+Math.random()*80)*(1-cfg.eFire*dm.eFire)+12));
         if(Math.random()<cfg.eFire*dm.eFire*e.fMul){
           if(e.ti===4){// Bomber: 3-way spread
-            for(let a=-0.28;a<=0.28;a+=0.28)eBullets.push({x:e.x+e.w/2,y:e.y+e.h,vx:Math.sin(a)*4,vy:4+curLevel*.12,col:e.col,r:6});
+            for(let a=-0.28;a<=0.28;a+=0.28)eBullets.push({x:e.x+e.w/2,y:e.y+e.h,vx:Math.sin(a)*4*dt,vy:(4+curLevel*.12)*dt,col:e.col,r:6});
           }else{
-            eBullets.push({x:e.x+e.w/2,y:e.y+e.h,vx:0,vy:4+curLevel*.12,col:e.col,r:5});
+            eBullets.push({x:e.x+e.w/2,y:e.y+e.h,vx:0,vy:(4+curLevel*.12),col:e.col,r:5});
           }
         }
       }
@@ -1066,77 +1925,1052 @@ function loop(){
   if(boss){
     if(boss.shk>0)boss.shk--;
     const bspd=(1.5+curLevel*.09)*dm.eMov;
-    boss.x+=boss.mDir*bspd;
+    boss.x+=boss.mDir*bspd*dt;
     if(boss.x+boss.w>GW-8){boss.x=GW-8-boss.w;boss.mDir=-1;}
     if(boss.x<8){boss.x=8;boss.mDir=1;}
 
     // Normal shooting
-    boss.sT--;
+    boss.sT-=dt;
     if(boss.sT<=0){
       const pct=boss.hp/boss.mHp;
-      boss.sT=pct>.5?55:pct>.25?30:18;
-      const n=pct>.5?1:pct>.25?3:5;
-      for(let i=0;i<n;i++){const sp=(i-(n-1)/2)*.3;eBullets.push({x:boss.x+boss.w/2,y:boss.y+boss.h,vx:sp*3,vy:5+curLevel*.18,col:'#ff0040',r:8,isBoss:true});}
+      // Normal shots: max 3 bullets, moderate speed — player can dodge these
+      boss.sT=pct>.5?70:pct>.25?45:28;
+      const n=pct>.5?1:pct>.25?2:3;
+      const bspread=0.25;
+      for(let i=0;i<n;i++){const sp=(i-(n-1)/2)*bspread;eBullets.push({x:boss.x+boss.w/2,y:boss.y+boss.h,vx:sp*4,vy:3.5+curLevel*.08,col:'#ff0040',r:8,isBoss:true});}
     }
 
-    // ── Boss laser (all tiers 8+) ──
-    if(cfg.bLaser){
-      if(!bLaserOn){bLaserCD--;
-        if(bLaserCD<=0){bLaserOn=true;bLaserT=100;bLaserX=boss.x+boss.w/2;bLaserCD=Math.max(100,260-curLevel*7);sfxBossLaserSfx();}
-      }else{
-        bLaserT--;if(bLaserT<=0)bLaserOn=false;
-        if(bLaserT%18===0){const cx=bLaserX;if(cx>player.x&&cx<player.x+player.w)takeDmg(1);}
-      }
-    }
-
-    // ── Special attack per tier ──
+    // ── SPECIAL ATTACKS: Telegraphed, per-boss, always dodgeable ──
     if(boss.bd){
-      bossSpecialT--;
+      bossSpecialT-=dt;
       if(bossSpecialT<=0){
         bossSpecialT=bossSpecialCD;
         const sp=boss.bd.special;
-        const pct=boss.hp/boss.mHp;
-        if(sp==='lid_slam'||sp==='all'){
-          // LID SLAM: rapid downward 5-bullet spread from full width
+        const tier=boss.tier;
+
+        // ─── BOSS 0: THE LID KING — Column Crash ────────────────────
+        // Golden lids slam down in all but 2 adjacent safe columns.
+        // Safe columns shown by green sparks for 1 second before lids fall.
+        if(sp==='lid_slam'){
           sfxLidSlam();
-          for(let i=0;i<7;i++){const rx=boss.x+20+i*(boss.w-40)/6;eBullets.push({x:rx,y:boss.y+boss.h,vx:0,vy:7+curLevel*.15,col:'#ff6600',r:9,isBoss:true});}
+          const cols=8;
+          const safeCol=Math.floor(Math.random()*(cols-1));
+          const cw=Math.floor(GW/cols);
+          // Green telegraph sparks on safe columns
+          for(let gy=boss.y+boss.h+20;gy<GH;gy+=40){
+            particles.push({x:safeCol*cw+cw/2,y:gy,vx:0,vy:-1,r:6,al:0.9,col:'#00ff44'});
+            particles.push({x:(safeCol+1)*cw+cw/2,y:gy,vx:0,vy:-1,r:6,al:0.9,col:'#00ff44'});
+          }
+          for(let c=0;c<cols;c++){
+            if(c===safeCol||c===safeCol+1)continue;
+            const rx=c*cw+cw/2;
+            // Start stationary at top, then accelerate down after 65 frames
+            eBullets.push({x:rx,y:boss.y+boss.h+8,vx:0,vy:0,col:'#ffaa00',r:11,isBoss:true,
+              _tT:65,_aVy:5});
+          }
         }
-        if(sp==='ice_ring'||sp==='all'){
-          // ICE RING: 8-way radial burst from boss center
+
+        // ─── BOSS 1: FROSTLOCK — Ice Wall with Gap ──────────────────
+        // A solid wall of ice slides down with one wide gap.
+        // Gap position telegraphed with blue glow column for 1 second.
+        if(sp==='ice_ring'){
           sfxIceRing();
-          const cx=boss.x+boss.w/2,cy=boss.y+boss.h/2;
-          for(let a=0;a<8;a++){const ang=(a/8)*Math.PI*2;eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*4.5,vy:Math.sin(ang)*4.5,col:'#88ddff',r:7,isBoss:true});}
+          const gapCenter=120+Math.floor(Math.random()*(GW-240));
+          const gapHalf=90; // 180px total gap — very generous
+          // Telegraph: cyan glow in safe gap
+          for(let gy=boss.y+boss.h+10;gy<GH;gy+=25){
+            particles.push({x:gapCenter+Math.random()*60-30,y:gy,vx:0,vy:0,r:5,al:0.7,col:'#00ffff'});
+          }
+          // Ice bullets spaced across screen, skipping gap
+          for(let bx2=0;bx2<GW+20;bx2+=20){
+            if(bx2>=gapCenter-gapHalf&&bx2<=gapCenter+gapHalf)continue;
+            eBullets.push({x:bx2,y:boss.y+boss.h+5,vx:0,vy:0,col:'#aaddff',r:9,isBoss:true,
+              _tT:70,_aVy:3.5});
+          }
         }
-        if(sp==='heat_wave'||sp==='all'){
-          // HEAT WAVE: sweeping row of fireballs at player height
+
+        // ─── BOSS 2: SAUCEPAN SAM — Heat Column ─────────────────────
+        // A column of fire jets up from the bottom. One side is always safe.
+        // The safe side (left or right half) is shown with green flash first.
+        if(sp==='heat_wave'){
           sfxHeatWave();
-          for(let i=0;i<6;i++){const ry=player.y-60+i*20;eBullets.push({x:boss.x>GW/2?GW:0,y:ry,vx:boss.x>GW/2?-5:5,vy:0,col:'#ff4400',r:8,isBoss:true});}
+          boss._hwSide=(boss._hwSide||0)+1;
+          const dangerLeft=(boss._hwSide%2===0);
+          // Green safe-zone flash (RIGHT side safe if danger on left, vice versa)
+          const safeX=dangerLeft?GW/2:0;
+          for(let sy=GH-20;sy>boss.y+boss.h;sy-=30){
+            particles.push({x:safeX+Math.random()*(GW/2),y:sy,vx:0,vy:-2,r:5,al:0.8,col:'#00ff88'});
+          }
+          // Fire jets rise from bottom on danger side, staggered timing
+          const numJets=7;
+          for(let j=0;j<numJets;j++){
+            const jx=(dangerLeft?0:GW/2)+j*((GW/2)/numJets)+20;
+            // Stagger: jets fire in sequence so player can see pattern
+            const delay=j*12; // frames apart
+            eBullets.push({x:jx,y:GH+5,vx:0,vy:0,col:'#ff4400',r:10,isBoss:true,
+              _tT:55+delay,_aVy:-6});
+          }
         }
-        if(sp==='laser'||sp==='all'){
-          // TWIN BEAM: fire two simultaneous boss lasers
+
+        // ─── BOSS 3: CRISPER LORD — Laser Columns ───────────────────
+        // 3 laser beams fire from boss, aiming at fixed columns.
+        // One column is always left open (clear of beams).
+        // Beams telegraph as thin lines for 1.5s before dealing damage.
+        if(sp==='laser'){
           sfxBossLaserSfx();
-          bLaserOn=true;bLaserT=80;
-          bLaserX=boss.x+boss.w*0.3; // first beam
-          // schedule second beam
-          setTimeout(()=>{if(boss){bLaserOn=true;bLaserT=80;bLaserX=boss.x+boss.w*0.7;}},500);
+          // Pick 3 beam X positions out of 5 possible columns, leave 2 open
+          const cols5=[GW*0.1,GW*0.3,GW*0.5,GW*0.7,GW*0.9];
+          const shuffled=[...cols5].sort(()=>Math.random()-0.5);
+          const beamXs=shuffled.slice(0,3); // 3 beams, 2 open columns
+          const safeCols=shuffled.slice(3);
+          // Green safe column sparks
+          for(const sx of safeCols){
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=35){
+              particles.push({x:sx+Math.random()*20-10,y:gy,vx:0,vy:0,r:5,al:0.8,col:'#44ff88'});
+            }
+          }
+          // Beam warning then damage shots
+          for(const bx3 of beamXs){
+            // Warning particles (thin line)
+            for(let gy2=boss.y+boss.h+10;gy2<GH;gy2+=18){
+              particles.push({x:bx3,y:gy2,vx:0,vy:0,r:3,al:0.6,col:'#ff4466'});
+            }
+            // After delay, fire bullet column
+            eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,col:'#ff0066',r:8,isBoss:true,
+              _tT:90,_aVy:7});
+          }
         }
-        if(sp==='barrage'||sp==='all'){
-          // BARRAGE: 12-bullet aimed stream at player
+
+        // ─── BOSS 4: THERMOS PRIME — Spiral With Gaps ───────────────
+        // Bullets fire outward in a slow spiral. Every 4th bullet skipped
+        // leaving clear escape lanes. Player can orbit the gaps.
+        if(sp==='barrage'){
           sfxBarrage();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          const total=24;
+          for(let i=0;i<total;i++){
+            if(i%4===2)continue; // every 4th position is a gap
+            const ang=(i/total)*Math.PI*2+(boss._spiralOff||0);
+            const spd=2.2+Math.random()*0.4;
+            eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+              col:'#ff0088',r:9,isBoss:true});
+            // Yellow gap markers
+            if(i%4===1||i%4===3){
+              const gAng=((i+1)/total)*Math.PI*2+(boss._spiralOff||0);
+              particles.push({x:cx+Math.cos(gAng)*50,y:cy+Math.sin(gAng)*50,
+                vx:0,vy:0,r:7,al:0.8,col:'#ffff00'});
+            }
+          }
+          boss._spiralOff=((boss._spiralOff||0)+0.4)%(Math.PI*2);
+        }
+
+        // ─── BOSS 5: SUPERNOVA — Rotating Burst with 3 Gaps ─────────
+        // Huge ring of bullets with 3 large clear arcs (120° apart).
+        // Ring rotates slowly so player must track the gaps.
+        if(sp==='all'){
+          if(!boss._snovAtk)boss._snovAtk=0;
+          boss._snovAtk=(boss._snovAtk+1)%3;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+
+          if(boss._snovAtk===0){
+            // Attack A: Rotating ring with 3 large gaps
+            sfxBossLaserSfx();
+            const offset=boss._snovRot||0;
+            boss._snovRot=(offset+Math.PI/4)%(Math.PI*2);
+            const numB=30;
+            const gapArcs=[offset,offset+Math.PI*2/3,offset+Math.PI*4/3];
+            const gapSize=Math.PI*0.35;
+            for(let i=0;i<numB;i++){
+              const ang=(i/numB)*Math.PI*2;
+              const inGap=gapArcs.some(g=>{
+                const d=Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI);
+                return d<gapSize;
+              });
+              if(inGap)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*2.5,vy:Math.sin(ang)*2.5,
+                col:'#ff00ff',r:9,isBoss:true});
+            }
+            // Show gaps with magenta sparks
+            for(const ga of gapArcs){
+              for(let rd=20;rd<140;rd+=25){
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#ff88ff'});
+              }
+            }
+
+          } else if(boss._snovAtk===1){
+            // Attack B: Twin sweeping laser beams with clear center lane
+            sfxBossLaserSfx();
+            // Left and right beams, center 200px always safe
+            const safeZone=120;
+            for(let bx4=0;bx4<GW;bx4+=18){
+              const distFromCenter=Math.abs(bx4-GW/2);
+              if(distFromCenter<safeZone)continue; // center is safe
+              eBullets.push({x:bx4,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#aa44ff',r:8,isBoss:true,_tT:80,_aVy:4.5});
+            }
+            // Green center lane telegraph
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=28){
+              particles.push({x:GW/2+Math.random()*safeZone*2-safeZone,y:gy,
+                vx:0,vy:0,r:5,al:0.7,col:'#ff88ff'});
+            }
+
+          } else {
+            // Attack C: 4-way cross with diagonal escape lanes
+            sfxLidSlam();
+            const numPerArm=8;
+            const armAngles=[Math.PI/2,Math.PI*3/2]; // only down and sideways
+            // Diagonal gaps at 45°/135°/225°/315° — always safe
+            for(const armA of armAngles){
+              for(let s=0;s<numPerArm;s++){
+                const spread=(s-(numPerArm-1)/2)*0.12;
+                eBullets.push({x:cx,y:cy,
+                  vx:Math.sin(armA+spread)*2.8,vy:Math.cos(armA+spread)*2.8,
+                  col:'#ff00ff',r:10,isBoss:true});
+              }
+            }
+            // Show diagonal safe lanes
+            const diagAngles=[Math.PI/4,Math.PI*3/4,Math.PI*5/4,Math.PI*7/4];
+            for(const da of diagAngles){
+              for(let rd=30;rd<160;rd+=28){
+                particles.push({x:cx+Math.cos(da)*rd,y:cy+Math.sin(da)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#ff88ff'});
+              }
+            }
+          }
+        }
+
+        // ═══ TIER 6: VOID LUNCHBOX — void_pull ══════════════════
+        // Gravity wells appear across screen, pulling bullets toward them
+        // Two safe zones always exist at screen edges
+        if(sp==='void_pull'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          // 3 gravity-pull rings: bullets orbit inward, leaving 2 edge corridors safe
+          const safeX1=80,safeX2=GW-80;
+          for(let a=0;a<36;a++){
+            const ang=(a/36)*Math.PI*2;
+            if(Math.abs(Math.cos(ang)*GW/2+GW/2-safeX1)<90)continue;
+            if(Math.abs(Math.cos(ang)*GW/2+GW/2-safeX2)<90)continue;
+            const r2=80+Math.random()*60;
+            eBullets.push({x:cx+Math.cos(ang)*r2,y:cy+Math.sin(ang)*r2,
+              vx:-Math.cos(ang)*1.8,vy:-Math.sin(ang)*1.8,
+              col:'#8800ff',r:10,isBoss:true});
+          }
+          for(let gy=cy+20;gy<GH;gy+=30){
+            particles.push({x:safeX1,y:gy,vx:0,vy:0,r:5,al:0.8,col:'#00ff88'});
+            particles.push({x:safeX2,y:gy,vx:0,vy:0,r:5,al:0.8,col:'#00ff88'});
+          }
+        }
+
+        // ═══ TIER 7: COLANDER OF DOOM — hole_burst ══════════════
+        // 8 burst streams from fixed hole positions, wide gaps between each
+        if(sp==='hole_burst'){
+          sfxLidSlam();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          const holeAngles=[0,Math.PI/4,Math.PI/2,Math.PI*3/4,
+                            Math.PI,Math.PI*5/4,Math.PI*3/2,Math.PI*7/4];
+          // Only fire 4 of 8 holes, leaving 4 gaps
+          const activeHoles=holeAngles.filter((_,i)=>i%2===0);
+          for(const ha of activeHoles){
+            for(let burst2=0;burst2<4;burst2++){
+              const spread=ha+(burst2-1.5)*0.15;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(spread)*4,vy:Math.sin(spread)*4,
+                col:'#ff2200',r:9,isBoss:true});
+            }
+          }
+          // Mark gap angles in green
+          const gapHoles=holeAngles.filter((_,i)=>i%2===1);
+          for(const gh of gapHoles){
+            for(let rd=30;rd<150;rd+=25)
+              particles.push({x:cx+Math.cos(gh)*rd,y:cy+Math.sin(gh)*rd,
+                vx:0,vy:0,r:7,al:0.9,col:'#44ff88'});
+          }
+        }
+
+        // ═══ TIER 8: BLENDER KING — blade_spin ══════════════════
+        // Spinning blades (tight spiral) with wide visible gaps
+        // Rotates each fire, player must track the gap rotation
+        if(sp==='blade_spin'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._bladeRot=(boss._bladeRot||0)+Math.PI/6;
+          const blades=5,gapSize=Math.PI*0.32;
+          for(let b2=0;b2<24;b2++){
+            const ang=(b2/24)*Math.PI*2;
+            // Check gap: every 5th sector is open
+            let inGap=false;
+            for(let k=0;k<blades;k++){
+              const gapCenter=boss._bladeRot+k*(Math.PI*2/blades);
+              const diff=Math.abs(((ang-gapCenter+Math.PI*3)%(Math.PI*2))-Math.PI);
+              if(diff<gapSize){inGap=true;break;}
+            }
+            if(inGap)continue;
+            const spd=3+Math.random()*0.5;
+            eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+              col:'#00ddff',r:9,isBoss:true});
+          }
+          // Show gap positions
+          for(let k=0;k<blades;k++){
+            const gc=boss._bladeRot+k*(Math.PI*2/blades);
+            for(let rd=25;rd<130;rd+=22)
+              particles.push({x:cx+Math.cos(gc)*rd,y:cy+Math.sin(gc)*rd,
+                vx:0,vy:0,r:6,al:0.9,col:'#88ffff'});
+          }
+        }
+
+        // ═══ TIER 9: PYREX OVERLORD — heat_cage ═════════════════
+        // Walls of fire on both sides narrow toward center.
+        // A safe zone of 180px runs down the center at all times.
+        if(sp==='heat_cage'){
+          sfxHeatWave();
+          const safeW=160,cx=GW/2;
+          // Left wall, right wall — bullets rush inward
+          for(let gy=boss.y+boss.h+10;gy<GH;gy+=22){
+            // Left
+            eBullets.push({x:0,y:gy,vx:0,vy:0,col:'#ff4400',r:9,isBoss:true,
+              _tT:70,_aVy:0,_aVx:4.8});
+            // Right
+            eBullets.push({x:GW,y:gy,vx:0,vy:0,col:'#ff4400',r:9,isBoss:true,
+              _tT:70,_aVy:0,_aVx:-4.8});
+          }
+          // Center safe zone telegraph
+          for(let gy=boss.y+boss.h+10;gy<GH;gy+=28){
+            particles.push({x:cx-safeW/2+Math.random()*safeW,y:gy,
+              vx:0,vy:0,r:5,al:0.7,col:'#ffaa00'});
+          }
+        }
+
+        // ═══ TIER 10: TUPPERLOCK OMEGA — seal_burst ═════════════
+        // Expanding concentric rings with alternating gaps.
+        // Ring 1 gaps at 0°/120°/240°, ring 2 gaps at 60°/180°/300°
+        if(sp==='seal_burst'){
+          sfxIceRing();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          [0,Math.PI/3].forEach((offset,ring)=>{
+            const ringGaps=[offset,offset+Math.PI*2/3,offset+Math.PI*4/3];
+            const gapSz=Math.PI*0.28;
+            const spd=1.8+ring*0.8;
+            for(let b2=0;b2<32;b2++){
+              const ang=(b2/32)*Math.PI*2;
+              const inGap=ringGaps.some(g=>{
+                const d=Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI);
+                return d<gapSz;
+              });
+              if(inGap)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:ring===0?'#00ff44':'#88ff44',r:8,isBoss:true});
+            }
+            for(const ga of ringGaps)
+              for(let rd=20;rd<110;rd+=20)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:6,al:0.9,col:'#aaffaa'});
+          });
+        }
+
+        // ═══ TIER 11: ABYSS STRAINER — abyss_rain ═══════════════
+        // Dense rain of bullets with zigzag safe corridors telegraphed
+        // by a chain of cyan sparks. Player must follow the corridor.
+        if(sp==='abyss_rain'){
+          sfxBarrage();
+          const corridorX=100+Math.floor(Math.random()*(GW-200));
+          const corridorW=130;
+          for(let bx3=10;bx3<GW;bx3+=18){
+            if(bx3>=corridorX&&bx3<=corridorX+corridorW)continue;
+            eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+              col:'#4444ff',r:8,isBoss:true,_tT:65,_aVy:4.2});
+          }
+          // Corridor sparks
+          for(let gy=boss.y+boss.h+10;gy<GH;gy+=22)
+            particles.push({x:corridorX+Math.random()*corridorW,y:gy,
+              vx:0,vy:0,r:5,al:0.85,col:'#44aaff'});
+        }
+
+        // ═══ TIER 12: ANTIMATTER CASSEROLE — matter_wave ════════
+        // 3 sweeping walls of bullets cross from alternating directions
+        // Each wave has a 160px gap at a different X.
+        if(sp==='matter_wave'){
+          sfxHeatWave();
+          boss._mwaveCount=(boss._mwaveCount||0)+1;
+          const fromLeft=(boss._mwaveCount%2===0);
+          for(let wave=0;wave<3;wave++){
+            const gapX=80+wave*220+Math.floor(Math.random()*80);
+            const delay=wave*40;
+            for(let bx3=0;bx3<GW;bx3+=16){
+              if(bx3>=gapX&&bx3<=gapX+160)continue;
+              eBullets.push({x:fromLeft?-20:GW+20,y:boss.y+boss.h+30+wave*60,
+                vx:0,vy:0,col:'#ff00aa',r:9,isBoss:true,
+                _tT:50+delay,_aVy:0,_aVx:fromLeft?5:-5});
+            }
+            for(let gy=boss.y+boss.h+20+wave*60;gy<boss.y+boss.h+80+wave*60;gy+=20)
+              particles.push({x:gapX+Math.random()*160,y:gy,
+                vx:0,vy:0,r:6,al:0.9,col:'#ff88dd'});
+          }
+        }
+
+        // ═══ TIER 13: GRAVITON FLASK — grav_crush ════════════════
+        // Bullets spawn at edges and curve toward player — but are slow.
+        // There is always a safe "blind spot" directly above the player.
+        if(sp==='grav_crush'){
+          sfxBossLaserSfx();
           const px=player.x+player.w/2,py=player.y;
-          const bx=boss.x+boss.w/2,by=boss.y+boss.h;
-          const dist=Math.sqrt((px-bx)**2+(py-by)**2)||1;
-          const dvx=(px-bx)/dist*6,dvy=(py-by)/dist*6;
-          for(let i=0;i<10;i++){setTimeout(()=>{if(boss)eBullets.push({x:bx+(Math.random()-0.5)*40,y:by,vx:dvx+(Math.random()-0.5)*1.5,vy:dvy,col:'#ff0080',r:7,isBoss:true});},i*80);}
+          const blindW=100;
+          // Bullets from top edge, left edge, right edge
+          for(let bx3=0;bx3<GW;bx3+=22){
+            if(Math.abs(bx3-px)<blindW)continue; // blind spot above player
+            eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:2.5,
+              col:'#aaffff',r:9,isBoss:true});
+          }
+          // Safe zone sparks above player
+          for(let gy=py-60;gy<py;gy+=18)
+            particles.push({x:px-blindW/2+Math.random()*blindW,y:gy,
+              vx:0,vy:0,r:6,al:0.9,col:'#aaffff'});
+        }
+
+        // ═══ TIER 14: OMEGA PRESSURE COOKER — pressure_burst ════
+        // Steam jets shoot from 6 fixed vents. Vents show warning steam
+        // for 1 second, then fire. 2 vents always stay cold (safe).
+        if(sp==='pressure_burst'){
+          sfxLidSlam();
+          const ventX=[GW*.1,GW*.25,GW*.4,GW*.55,GW*.7,GW*.85];
+          const safeIdxs=new Set([Math.floor(Math.random()*6),Math.floor(Math.random()*6)+1].map(v=>v%6));
+          ventX.forEach((vx,i)=>{
+            if(safeIdxs.has(i)){
+              // Cold vent telegraph (blue = safe)
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=30)
+                particles.push({x:vx,y:gy,vx:(Math.random()-0.5)*0.5,vy:0,r:5,al:0.7,col:'#44ffaa'});
+            } else {
+              // Hot vent — shoots after telegraph
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=30)
+                particles.push({x:vx,y:gy,vx:0,vy:0,r:4,al:0.5,col:'#ff4400'});
+              eBullets.push({x:vx,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff5500',r:11,isBoss:true,_tT:90,_aVy:5.5});
+            }
+          });
+        }
+
+        // ═══ TIER 15: SINGULARITY POT — singularity ═════════════
+        // A black hole forms at center top, warping all bullets outward
+        // in a dense ring. 4 wide safe gaps at N/S/E/W.
+        if(sp==='singularity'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          const safeAngles=[Math.PI/2,Math.PI,Math.PI*3/2,Math.PI*2];
+          const safeArc=Math.PI*0.25;
+          const rings=2;
+          for(let ring=0;ring<rings;ring++){
+            const spd=2.2+ring*1.2;
+            const total=38;
+            for(let b2=0;b2<total;b2++){
+              const ang=(b2/total)*Math.PI*2;
+              const safe=safeAngles.some(sa=>{
+                const d=Math.abs(((ang-sa+Math.PI*3)%(Math.PI*2))-Math.PI);
+                return d<safeArc;
+              });
+              if(safe)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:ring===0?'#ffffff':'#aaaaff',r:9,isBoss:true});
+            }
+          }
+          for(const sa of safeAngles)
+            for(let rd=25;rd<160;rd+=22)
+              particles.push({x:cx+Math.cos(sa)*rd,y:cy+Math.sin(sa)*rd,
+                vx:0,vy:0,r:7,al:0.9,col:'#ffffff'});
+        }
+
+        // ═══ TIER 16: DARK MATTER DECANTER — dark_storm ═════════
+        // Phase 1: column rain with 2 corridors
+        // Phase 2: ring burst with 3 gaps
+        // Phase 3: cross fire with diagonal escapes
+        if(sp==='dark_storm'){
+          if(!boss._dsAtk)boss._dsAtk=0;
+          boss._dsAtk=(boss._dsAtk+1)%3;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          if(boss._dsAtk===0){
+            // Column rain, 2 corridors
+            const c1=100+Math.floor(Math.random()*200);
+            const c2=GW-c1-120;
+            for(let bx3=0;bx3<GW;bx3+=16){
+              if(bx3>=c1&&bx3<=c1+120)continue;
+              if(bx3>=c2&&bx3<=c2+120)continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff44ff',r:9,isBoss:true,_tT:60,_aVy:4.8});
+            }
+            [[c1,120],[c2,120]].forEach(([cx2,cw])=>{
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=25)
+                particles.push({x:cx2+Math.random()*cw,y:gy,
+                  vx:0,vy:0,r:5,al:0.8,col:'#ff88ff'});
+            });
+          } else if(boss._dsAtk===1){
+            // Ring burst 3 gaps
+            const gOff=boss._dsOff||0;boss._dsOff=(gOff+Math.PI/3)%(Math.PI*2);
+            const gapAngles=[gOff,gOff+Math.PI*2/3,gOff+Math.PI*4/3];
+            const gapSz=Math.PI*0.28;
+            for(let b2=0;b2<32;b2++){
+              const ang=(b2/32)*Math.PI*2;
+              const safe=gapAngles.some(g=>{
+                const d=Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI);
+                return d<gapSz;
+              });
+              if(safe)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*3,vy:Math.sin(ang)*3,
+                col:'#cc00ff',r:10,isBoss:true});
+            }
+            for(const ga of gapAngles)
+              for(let rd=25;rd<150;rd+=25)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#dd88ff'});
+          } else {
+            // Cross fire, diagonal escapes
+            [Math.PI/2,Math.PI*3/2].forEach(armA=>{
+              for(let s=0;s<10;s++){
+                const spread=armA+(s-4.5)*0.11;
+                eBullets.push({x:cx,y:cy,
+                  vx:Math.sin(spread)*3.2,vy:Math.cos(spread)*3.2,
+                  col:'#ff00ff',r:10,isBoss:true});
+              }
+            });
+            [Math.PI/4,Math.PI*3/4,Math.PI*5/4,Math.PI*7/4].forEach(da=>{
+              for(let rd=30;rd<170;rd+=28)
+                particles.push({x:cx+Math.cos(da)*rd,y:cy+Math.sin(da)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#ff88ff'});
+            });
+          }
+        }
+
+        // ═══ TIER 17: ETERNAL TUPPERWARE — eternal ═══════════════
+        // All 4 attacks rotate each use. Each is devastating but readable.
+        if(sp==='eternal'){
+          if(!boss._etAtk)boss._etAtk=0;
+          boss._etAtk=(boss._etAtk+1)%4;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+
+          if(boss._etAtk===0){
+            // WRATH OF VOID: dense ring 6 gaps
+            const gOff=boss._etRot||0;boss._etRot=(gOff+Math.PI/5)%(Math.PI*2);
+            const gaps=6,gSz=Math.PI*0.22;
+            const gAngles=Array.from({length:gaps},(_,i)=>gOff+i*(Math.PI*2/gaps));
+            for(let b2=0;b2<44;b2++){
+              const ang=(b2/44)*Math.PI*2;
+              if(gAngles.some(g=>Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI)<gSz))continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*3,vy:Math.sin(ang)*3,
+                col:'#ffff00',r:10,isBoss:true});
+            }
+            gAngles.forEach(ga=>{
+              for(let rd=20;rd<160;rd+=22)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:7,al:0.95,col:'#ffffaa'});
+            });
+          } else if(boss._etAtk===1){
+            // ETERNAL COLUMNS: full-screen column rain, 3 safe corridors
+            const cors=[[GW*.12,100],[GW*.46,100],[GW*.78,100]];
+            for(let bx3=0;bx3<GW;bx3+=14){
+              if(cors.some(([cx3,cw])=>bx3>=cx3&&bx3<=cx3+cw))continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ffdd00',r:10,isBoss:true,_tT:55,_aVy:5.5});
+            }
+            cors.forEach(([cx3,cw])=>{
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=22)
+                particles.push({x:cx3+Math.random()*cw,y:gy,
+                  vx:0,vy:0,r:6,al:0.9,col:'#ffffaa'});
+            });
+          } else if(boss._etAtk===2){
+            // UNDYING JETS: jets from both sides, safe 200px center corridor
+            const safe=100;
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=18){
+              eBullets.push({x:0,y:gy,vx:0,vy:0,col:'#ffaa00',r:10,isBoss:true,_tT:65,_aVy:0,_aVx:5.5});
+              eBullets.push({x:GW,y:gy,vx:0,vy:0,col:'#ffaa00',r:10,isBoss:true,_tT:65,_aVy:0,_aVx:-5.5});
+            }
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=25)
+              particles.push({x:GW/2-safe+Math.random()*safe*2,y:gy,
+                vx:0,vy:0,r:6,al:0.9,col:'#ffff88'});
+          } else {
+            // OMEGA SPIRAL: massive spiral with 4 clear lanes
+            boss._etSpiral=(boss._etSpiral||0)+Math.PI/8;
+            const lanes=4;
+            for(let b2=0;b2<48;b2++){
+              const ang=(b2/48)*Math.PI*2+boss._etSpiral;
+              let inLane=false;
+              for(let k=0;k<lanes;k++){
+                const la=boss._etSpiral+k*(Math.PI*2/lanes);
+                const d=Math.abs(((ang-la+Math.PI*3)%(Math.PI*2))-Math.PI);
+                if(d<Math.PI*0.2){inLane=true;break;}
+              }
+              if(inLane)continue;
+              const spd=2.8+Math.random()*0.5;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:'#ffff44',r:10,isBoss:true});
+            }
+            for(let k=0;k<lanes;k++){
+              const la=boss._etSpiral+k*(Math.PI*2/lanes);
+              for(let rd=20;rd<180;rd+=25)
+                particles.push({x:cx+Math.cos(la)*rd,y:cy+Math.sin(la)*rd,
+                  vx:0,vy:0,r:8,al:0.95,col:'#ffff88'});
+            }
+          }
         }
       }
     }
+
+    // ── Normal boss shots: reduce volume at high levels to stay fair ──
+
+        // ════ TIER 18: NECROPLASTIC — necro_grid ════════════════════
+        // A 5×3 grid of bullet nodes materialise above player.
+        // Every other row is offset, creating a zig-zag maze.
+        // Two full vertical columns always left empty (the escape lanes).
+        if(sp==='necro_grid'){
+          sfxBossLaserSfx();
+          const cols=7,rows=3;
+          const safeC=new Set([Math.floor(Math.random()*cols),Math.floor(Math.random()*cols)]);
+          for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){
+            if(safeC.has(c))continue;
+            const ox=(r%2)*30; // zig-zag offset
+            const bx=(GW/(cols+1))*(c+1)+ox;
+            const by=boss.y+boss.h+20+r*50;
+            eBullets.push({x:bx,y:by,vx:0,vy:0,col:'#ff0000',r:10,isBoss:true,
+              _tT:75,_aVy:4+r*0.4});
+          }}
+          for(const sc of safeC)
+            for(let gy=boss.y+boss.h;gy<GH;gy+=28)
+              particles.push({x:(GW/(cols+1))*(sc+1),y:gy,
+                vx:0,vy:0,r:5,al:0.8,col:'#ff4444'});
+        }
+
+        // ════ TIER 19: CENTENNIAL CANISTER — century_rage ════════════
+        // 4 rotating arms of bullets (like a death propeller).
+        // Each arm fires a stream; the gaps between arms are safe.
+        // Arms rotate each use so the safe angle shifts.
+        if(sp==='century_rage'){
+          sfxLidSlam();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._centRot=(boss._centRot||0)+Math.PI/5;
+          const arms=4,gapFrac=0.35; // gap is 35% of each sector
+          for(let b2=0;b2<48;b2++){
+            const ang=(b2/48)*Math.PI*2;
+            const norm=((ang-boss._centRot)%(Math.PI*2/arms)+Math.PI*2/arms)%(Math.PI*2/arms);
+            const sectorFrac=norm/(Math.PI*2/arms);
+            if(sectorFrac>0.5-gapFrac/2&&sectorFrac<0.5+gapFrac/2)continue; // gap center
+            const spd=3.2+Math.random()*0.4;
+            eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+              col:'#ffaa00',r:10,isBoss:true});
+          }
+          // Show arm midpoints (danger) and gap centres (safe)
+          for(let a=0;a<arms;a++){
+            const gapAng=boss._centRot+a*(Math.PI*2/arms)+Math.PI/arms;
+            for(let rd=25;rd<160;rd+=24)
+              particles.push({x:cx+Math.cos(gapAng)*rd,y:cy+Math.sin(gapAng)*rd,
+                vx:0,vy:0,r:7,al:0.9,col:'#ffdd88'});
+          }
+        }
+
+        // ════ TIER 20: PLASMA PITCHER — plasma_burst ═════════════════
+        // Two expanding plasma rings fire simultaneously with staggered gaps.
+        // Ring 1 gap at 0°, ring 2 gap at 180° — player must be in ONE gap.
+        // Rings grow outward so player has a brief window to find safety.
+        if(sp==='plasma_burst'){
+          sfxIceRing();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          [[0,1.5],[Math.PI,2.2]].forEach(([gapAng,spd])=>{
+            const gapSz=Math.PI*0.32;
+            for(let b2=0;b2<36;b2++){
+              const ang=(b2/36)*Math.PI*2;
+              const d=Math.abs(((ang-gapAng+Math.PI*3)%(Math.PI*2))-Math.PI);
+              if(d<gapSz)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:'#ff66ff',r:9,isBoss:true});
+            }
+            for(let rd=20;rd<150;rd+=22)
+              particles.push({x:cx+Math.cos(gapAng)*rd,y:cy+Math.sin(gapAng)*rd,
+                vx:0,vy:0,r:7,al:0.9,col:'#ffaaff'});
+          });
+        }
+
+        // ════ TIER 21: ABYSSAL LUNCH PAIL — abyssal_wave ════════════
+        // Three horizontal waves sweep downward in staggered timing.
+        // Each wave has one clear corridor 140px wide, corridors shift each wave.
+        if(sp==='abyssal_wave'){
+          sfxBarrage();
+          const shifts=[GW*0.15,GW*0.48,GW*0.75];
+          shifts.forEach((corX,wi)=>{
+            const corW=140;
+            for(let bx3=0;bx3<GW;bx3+=15){
+              if(bx3>=corX&&bx3<=corX+corW)continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10+wi*25,vx:0,vy:0,
+                col:'#00ffff',r:9,isBoss:true,_tT:45+wi*25,_aVy:4.5+wi*0.5});
+            }
+            for(let gy=boss.y+boss.h+10+wi*25;gy<GH;gy+=24)
+              particles.push({x:corX+Math.random()*corW,y:gy,
+                vx:0,vy:0,r:5,al:0.85,col:'#88ffff'});
+          });
+        }
+
+        // ════ TIER 22: FRACTAL FLASK — fractal_ring ══════════════════
+        // Nested rings of bullets — inner ring slow+big gaps, outer ring fast+small gaps.
+        // Player can always shelter in inner ring gaps.
+        if(sp==='fractal_ring'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._fracRot=(boss._fracRot||0)+Math.PI/7;
+          // Inner ring: 4 large gaps
+          [[24,2.0,Math.PI*0.32,0],[36,3.2,Math.PI*0.18,Math.PI/4]].forEach(([n,spd,gSz,rotOff],ri)=>{
+            const numGaps=ri===0?4:3;
+            for(let b2=0;b2<n;b2++){
+              const ang=(b2/n)*Math.PI*2;
+              let safe=false;
+              for(let g=0;g<numGaps;g++){
+                const ga=boss._fracRot+rotOff+g*(Math.PI*2/numGaps);
+                const d=Math.abs(((ang-ga+Math.PI*3)%(Math.PI*2))-Math.PI);
+                if(d<gSz){safe=true;break;}
+              }
+              if(safe)continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:ri===0?'#88ff88':'#44cc44',r:ri===0?10:8,isBoss:true});
+            }
+            if(ri===0){
+              for(let g=0;g<4;g++){
+                const ga=boss._fracRot+g*(Math.PI*2/4);
+                for(let rd=20;rd<140;rd+=22)
+                  particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                    vx:0,vy:0,r:6,al:0.9,col:'#aaffaa'});
+              }
+            }
+          });
+        }
+
+        // ════ TIER 23: OBLIVION BENTO — oblivion ═════════════════════
+        // Rotates through 4 phases each use. All phases deadly but each
+        // has exactly ONE clear escape zone shown in gold sparks.
+        if(sp==='oblivion'){
+          if(!boss._oblAtk)boss._oblAtk=0;
+          boss._oblAtk=(boss._oblAtk+1)%4;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          if(boss._oblAtk===0){
+            // Phase A: Column storm, 3 corridors
+            const cors=[[GW*.1,90],[GW*.45,90],[GW*.78,90]];
+            for(let bx3=0;bx3<GW;bx3+=13){
+              if(cors.some(([cx2,cw])=>bx3>=cx2&&bx3<=cx2+cw))continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff8800',r:10,isBoss:true,_tT:50,_aVy:5.8});
+            }
+            cors.forEach(([cx2,cw])=>{
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=22)
+                particles.push({x:cx2+Math.random()*cw,y:gy,vx:0,vy:0,r:5,al:0.9,col:'#ffcc44'});
+            });
+          } else if(boss._oblAtk===1){
+            // Phase B: 5-arm spinner, big gaps
+            boss._oblRot=(boss._oblRot||0)+Math.PI/4;
+            const arms=5,gSz=Math.PI*0.28;
+            for(let b2=0;b2<50;b2++){
+              const ang=(b2/50)*Math.PI*2;
+              const norm=((ang-boss._oblRot)%(Math.PI*2/arms)+Math.PI*2/arms)%(Math.PI*2/arms);
+              if(norm/(Math.PI*2/arms)>0.5-gSz/(2*Math.PI/arms)&&
+                 norm/(Math.PI*2/arms)<0.5+gSz/(2*Math.PI/arms))continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*3.5,vy:Math.sin(ang)*3.5,
+                col:'#ffaa00',r:10,isBoss:true});
+            }
+            for(let a=0;a<arms;a++){
+              const ga=boss._oblRot+a*(Math.PI*2/arms)+Math.PI/arms;
+              for(let rd=25;rd<170;rd+=26)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:8,al:0.9,col:'#ffdd88'});
+            }
+          } else if(boss._oblAtk===2){
+            // Phase C: Side jets, 220px center safe
+            const safe=110;
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=16){
+              eBullets.push({x:0,y:gy,vx:0,vy:0,col:'#ff6600',r:10,isBoss:true,_tT:60,_aVy:0,_aVx:5.8});
+              eBullets.push({x:GW,y:gy,vx:0,vy:0,col:'#ff6600',r:10,isBoss:true,_tT:60,_aVy:0,_aVx:-5.8});
+            }
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=24)
+              particles.push({x:GW/2-safe+Math.random()*safe*2,y:gy,vx:0,vy:0,r:6,al:0.9,col:'#ffdd44'});
+          } else {
+            // Phase D: Double ring 4 gaps each offset 45°
+            [[2.0,0],[3.0,Math.PI/4]].forEach(([spd,off])=>{
+              const gaps=4,gSz=Math.PI*0.24;
+              for(let b2=0;b2<40;b2++){
+                const ang=(b2/40)*Math.PI*2;
+                let safe=false;
+                for(let g=0;g<gaps;g++){
+                  const ga=(boss._oblRot||0)+off+g*(Math.PI*2/gaps);
+                  const d=Math.abs(((ang-ga+Math.PI*3)%(Math.PI*2))-Math.PI);
+                  if(d<gSz){safe=true;break;}
+                }
+                if(safe)continue;
+                eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                  col:'#ffaa44',r:9,isBoss:true});
+              }
+            });
+            const gaps=4;
+            for(let g=0;g<gaps;g++){
+              const ga=(boss._oblRot||0)+g*(Math.PI*2/gaps);
+              for(let rd=22;rd<160;rd+=24)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#ffcc88'});
+            }
+          }
+        }
+
+        // ════ TIER 24: DREAD DECANTER — dread_rain ═══════════════════
+        // Thick diagonal rain from top-left AND top-right simultaneously.
+        // Safe zone is a narrow V-shape in the centre bottom.
+        if(sp==='dread_rain'){
+          sfxHeatWave();
+          const safeBase=GW/2,safeW=140;
+          for(let bx3=0;bx3<GW;bx3+=14){
+            const dy=Math.abs(bx3-safeBase);
+            if(dy<safeW/2)continue; // V-safe zone
+            eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:(bx3<GW/2)?0.8:-0.8,vy:0,
+              col:'#ff3333',r:10,isBoss:true,_tT:55,_aVy:4.8});
+          }
+          for(let bx3=safeBase-safeW/2;bx3<safeBase+safeW/2;bx3+=22)
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=28)
+              particles.push({x:bx3+Math.random()*22,y:gy,vx:0,vy:0,r:6,al:0.8,col:'#ff8888'});
+        }
+
+        // ════ TIER 25: COSMIC CRISPER — cosmic_cross ═════════════════
+        // A rotating plus-sign of dense bullet walls.
+        // The 4 diagonal sectors are ALWAYS clear — 45°/135°/225°/315°.
+        if(sp==='cosmic_cross'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._ccRot=(boss._ccRot||0)+Math.PI/6;
+          // Arms at 0°/90°/180°/270° rotated by _ccRot, diagonals always safe
+          for(let b2=0;b2<52;b2++){
+            const ang=(b2/52)*Math.PI*2;
+            const rel=((ang-boss._ccRot)%(Math.PI/2)+Math.PI/2)%(Math.PI/2);
+            // Safe if within 30° of diagonal (rel near PI/4)
+            const dDiag=Math.abs(rel-Math.PI/4);
+            if(dDiag<Math.PI*0.22)continue;
+            const spd=3.0+Math.random()*0.5;
+            eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+              col:'#44ffdd',r:10,isBoss:true});
+          }
+          for(let d=0;d<4;d++){
+            const da=boss._ccRot+Math.PI/4+d*(Math.PI/2);
+            for(let rd=22;rd<170;rd+=24)
+              particles.push({x:cx+Math.cos(da)*rd,y:cy+Math.sin(da)*rd,
+                vx:0,vy:0,r:7,al:0.95,col:'#88ffee'});
+          }
+        }
+
+        // ════ TIER 26: VOID CASSEROLE — void_cage ════════════════════
+        // Shrinking cage of bullets closes in from all 4 sides.
+        // Centre safe zone shrinks slowly — player must dodge out
+        // through ONE side that's left open (telegraphed in purple).
+        if(sp==='void_cage'){
+          sfxIceRing();
+          const openSide=Math.floor(Math.random()*4); // 0=top,1=bot,2=left,3=right
+          const sideColors=['#aa88ff','#aa88ff','#aa88ff','#aa88ff'];
+          // Horizontal walls (top and bottom)
+          for(let bx3=30;bx3<GW-30;bx3+=16){
+            // Top wall — open if openSide===0
+            if(openSide!==0)
+              eBullets.push({x:bx3,y:boss.y+boss.h+15,vx:0,vy:0,
+                col:'#aa88ff',r:9,isBoss:true,_tT:70,_aVy:3.5});
+            // Bottom of screen flowing upward — not used; instead use slow top wall
+          }
+          // Vertical walls (left and right)
+          for(let gy=boss.y+boss.h+30;gy<GH-30;gy+=16){
+            if(openSide!==2) // left
+              eBullets.push({x:20,y:gy,vx:0,vy:0,col:'#aa88ff',r:9,isBoss:true,_tT:70,_aVy:0,_aVx:3.5});
+            if(openSide!==3) // right
+              eBullets.push({x:GW-20,y:gy,vx:0,vy:0,col:'#aa88ff',r:9,isBoss:true,_tT:70,_aVy:0,_aVx:-3.5});
+          }
+          // Show open side in green
+          const openLabel=['TOP','BOTTOM','LEFT','RIGHT'][openSide];
+          const openX=openSide===2?40:(openSide===3?GW-40:GW/2);
+          const openY=openSide===0?boss.y+boss.h+30:GH-50;
+          for(let i=0;i<8;i++)
+            particles.push({x:openX+Math.random()*60-30,y:openY+Math.random()*40-20,
+              vx:0,vy:0,r:9,al:0.95,col:'#88ff88'});
+        }
+
+        // ════ TIER 27: ENTROPY ENGINE — entropy_storm ════════════════
+        // 5-phase rotating chaos. Gets faster each phase.
+        // Always at least one clearly marked safe corridor.
+        if(sp==='entropy_storm'){
+          if(!boss._entAtk)boss._entAtk=0;
+          boss._entAtk=(boss._entAtk+1)%5;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._entRot=(boss._entRot||0)+Math.PI/6;
+
+          const phase=boss._entAtk;
+          if(phase<3){
+            // Phases 0-2: rotating ring with (3-phase) gaps
+            const numGaps=3-phase; // 3,2,1 gaps
+            const gSz=Math.PI/(numGaps+1.5);
+            const gAngles=Array.from({length:numGaps},(_,i)=>boss._entRot+i*(Math.PI*2/numGaps));
+            const spd=2.8+phase*0.6;
+            for(let b2=0;b2<44;b2++){
+              const ang=(b2/44)*Math.PI*2;
+              if(gAngles.some(g=>Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI)<gSz))continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                col:'#ff6644',r:10,isBoss:true});
+            }
+            gAngles.forEach(ga=>{
+              for(let rd=22;rd<165;rd+=24)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:7,al:0.9,col:'#ffaa88'});
+            });
+          } else if(phase===3){
+            // Phase 3: Column rain 2 corridors
+            const c1=80+Math.floor(Math.random()*200);
+            const c2=c1+240;
+            for(let bx3=0;bx3<GW;bx3+=13){
+              if((bx3>=c1&&bx3<=c1+100)||(bx3>=c2&&bx3<=c2+100))continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff6644',r:10,isBoss:true,_tT:52,_aVy:5.8});
+            }
+            [[c1,100],[c2,100]].forEach(([cx2,cw])=>{
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=24)
+                particles.push({x:cx2+Math.random()*cw,y:gy,vx:0,vy:0,r:5,al:0.85,col:'#ffaa88'});
+            });
+          } else {
+            // Phase 4: Side walls, centre 160px safe
+            const safe=80;
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=15){
+              eBullets.push({x:0,y:gy,vx:0,vy:0,col:'#ff6644',r:10,isBoss:true,_tT:60,_aVy:0,_aVx:6.0});
+              eBullets.push({x:GW,y:gy,vx:0,vy:0,col:'#ff6644',r:10,isBoss:true,_tT:60,_aVy:0,_aVx:-6.0});
+            }
+            for(let gy=boss.y+boss.h+10;gy<GH;gy+=22)
+              particles.push({x:GW/2-safe+Math.random()*safe*2,y:gy,vx:0,vy:0,r:6,al:0.9,col:'#ffaa88'});
+          }
+        }
+
+        // ════ TIER 28: OMEGA COLANDER — omega_holes ══════════════════
+        // 12 spinning bullet streams (like a clock face).
+        // Every other stream has a gap — 6 safe lanes always present.
+        // Streams rotate between uses so lanes shift.
+        if(sp==='omega_holes'){
+          sfxBossLaserSfx();
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._ohRot=(boss._ohRot||0)+Math.PI/8;
+          const streams=12;
+          for(let s=0;s<streams;s++){
+            if(s%2===0)continue; // every other stream is a gap
+            const ang=boss._ohRot+s*(Math.PI*2/streams);
+            for(let dist=0;dist<4;dist++){
+              const a=ang+(dist-1.5)*0.12;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(a)*3.5,vy:Math.sin(a)*3.5,
+                col:'#ffffff',r:10,isBoss:true});
+            }
+          }
+          // Show safe stream angles
+          for(let s=0;s<streams;s+=2){
+            const sAng=boss._ohRot+s*(Math.PI*2/streams);
+            for(let rd=22;rd<175;rd+=26)
+              particles.push({x:cx+Math.cos(sAng)*rd,y:cy+Math.sin(sAng)*rd,
+                vx:0,vy:0,r:8,al:0.95,col:'#cccccc'});
+          }
+        }
+
+        // ════ TIER 29: PRIMORDIAL TUPPERWARE — primordial ════════════
+        // THE FINAL BOSS. Cycles through 5 devastating attacks.
+        // Each is unique and escalates. All have a fair escape.
+        if(sp==='primordial'){
+          if(!boss._primAtk)boss._primAtk=0;
+          boss._primAtk=(boss._primAtk+1)%5;
+          const cx=boss.x+boss.w/2,cy=boss.y+boss.h;
+          boss._primRot=(boss._primRot||0)+Math.PI/7;
+
+          if(boss._primAtk===0){
+            // GENESIS: 8-gap ring expanding from boss — biggest ring yet
+            const gaps=8,gSz=Math.PI*0.18;
+            const gAs=Array.from({length:gaps},(_,i)=>boss._primRot+i*(Math.PI*2/gaps));
+            for(let b2=0;b2<60;b2++){
+              const ang=(b2/60)*Math.PI*2;
+              if(gAs.some(g=>Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI)<gSz))continue;
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*3.5,vy:Math.sin(ang)*3.5,
+                col:'#ff0000',r:11,isBoss:true});
+            }
+            gAs.forEach(ga=>{
+              for(let rd=20;rd<180;rd+=22)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:8,al:1.0,col:'#ff8888'});
+            });
+          } else if(boss._primAtk===1){
+            // APOCALYPSE COLUMNS: full-width rain, 4 narrow corridors
+            const cors=[[GW*0.06,70],[GW*0.31,70],[GW*0.58,70],[GW*0.82,70]];
+            for(let bx3=0;bx3<GW;bx3+=12){
+              if(cors.some(([cx2,cw])=>bx3>=cx2&&bx3<=cx2+cw))continue;
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff0000',r:11,isBoss:true,_tT:45,_aVy:6.2});
+            }
+            cors.forEach(([cx2,cw])=>{
+              for(let gy=boss.y+boss.h+10;gy<GH;gy+=22)
+                particles.push({x:cx2+Math.random()*cw,y:gy,vx:0,vy:0,r:6,al:0.95,col:'#ff8888'});
+            });
+          } else if(boss._primAtk===2){
+            // PRIMEVAL JETS: walls from all 3 sides (L+R+top), bottom safe
+            for(let gy=boss.y+boss.h+10;gy<GH*0.6;gy+=14){
+              eBullets.push({x:0,y:gy,vx:0,vy:0,col:'#ff0000',r:11,isBoss:true,_tT:55,_aVy:0,_aVx:6.0});
+              eBullets.push({x:GW,y:gy,vx:0,vy:0,col:'#ff0000',r:11,isBoss:true,_tT:55,_aVy:0,_aVx:-6.0});
+            }
+            for(let bx3=0;bx3<GW;bx3+=14)
+              eBullets.push({x:bx3,y:boss.y+boss.h+10,vx:0,vy:0,
+                col:'#ff0000',r:11,isBoss:true,_tT:55,_aVy:5.5});
+            // Safe zone: bottom quarter of screen
+            for(let gy=GH*0.7;gy<GH;gy+=24)
+              for(let bx3=50;bx3<GW-50;bx3+=50)
+                particles.push({x:bx3+Math.random()*50,y:gy,vx:0,vy:0,r:6,al:0.9,col:'#ff6666'});
+          } else if(boss._primAtk===3){
+            // EXTINCTION SPIRAL: 6-armed fast spiral, 6 clear lanes
+            const lanes=6;
+            for(let b2=0;b2<60;b2++){
+              const ang=(b2/60)*Math.PI*2+boss._primRot;
+              const norm=((ang-boss._primRot)%(Math.PI*2/lanes)+Math.PI*2/lanes)%(Math.PI*2/lanes);
+              const frac=norm/(Math.PI*2/lanes);
+              if(frac>0.35&&frac<0.65)continue; // centre 30% of each sector is safe
+              eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*3.8,vy:Math.sin(ang)*3.8,
+                col:'#ff0000',r:11,isBoss:true});
+            }
+            for(let l=0;l<lanes;l++){
+              const la=boss._primRot+l*(Math.PI*2/lanes)+Math.PI/lanes;
+              for(let rd=20;rd<185;rd+=25)
+                particles.push({x:cx+Math.cos(la)*rd,y:cy+Math.sin(la)*rd,
+                  vx:0,vy:0,r:8,al:1.0,col:'#ff6666'});
+            }
+          } else {
+            // THE END: Triple concentric rings, each offset, 3 gaps each
+            [[2.2,0,Math.PI*0.25],[3.0,Math.PI/3,Math.PI*0.22],[3.8,Math.PI*2/3,Math.PI*0.20]].forEach(([spd,off,gSz])=>{
+              const gaps=3;
+              const gAs=Array.from({length:gaps},(_,i)=>boss._primRot+off+i*(Math.PI*2/gaps));
+              for(let b2=0;b2<44;b2++){
+                const ang=(b2/44)*Math.PI*2;
+                if(gAs.some(g=>Math.abs(((ang-g+Math.PI*3)%(Math.PI*2))-Math.PI)<gSz))continue;
+                eBullets.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,
+                  col:'#ff0000',r:11,isBoss:true});
+              }
+            });
+            // Safe angles (intersections of all 3 rings)
+            for(let g=0;g<3;g++){
+              const ga=boss._primRot+g*(Math.PI*2/3);
+              for(let rd=20;rd<190;rd+=24)
+                particles.push({x:cx+Math.cos(ga)*rd,y:cy+Math.sin(ga)*rd,
+                  vx:0,vy:0,r:9,al:1.0,col:'#ff4444'});
+            }
+          }
+        }
+
+    // ── Normal boss shots: reduce volume at high levels to stay fair ──
+    // (already handled above, nothing extra needed)
   }
 
-  // Move projectiles
-  for(const b of bullets)b.y+=b.vy;
+  // Move projectiles (dt-scaled)
+  for(const b of bullets)b.y+=b.vy*dt;
   bullets=bullets.filter(b=>b.y>-20);
-  for(const b of eBullets){b.y+=b.vy;b.x+=b.vx||0;}
+  for(const b of eBullets){
+    // Telegraph system: _tT = warning frames (stationary), then _aVy/_aVx kick in
+    if(b._tT!==undefined&&b._tT>0){
+      b._tT-=dt;
+      if(b._tT<=0){
+        if(b._aVy!==undefined)b.vy=b._aVy;
+        if(b._aVx!==undefined)b.vx=b._aVx;
+        b._tT=undefined; // done telegraphing
+      }
+    }
+    b.y+=b.vy*dt;b.x+=(b.vx||0)*dt;
+  }
   eBullets=eBullets.filter(b=>b.y<GH+20&&b.x>-30&&b.x<GW+30);
 
   // Player bullets hit enemies/boss
@@ -1155,8 +2989,25 @@ function loop(){
   });
 
   // Particles
-  for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.09;p.al-=.022;}
+  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.09*dt;p.al-=.022*dt;}
   particles=particles.filter(p=>p.al>0);
+
+  // Heart drops
+  for(const h of heartDrops)h.y+=h.vy*dt;
+  heartDrops=heartDrops.filter(h=>h.y<GH+20);
+  // Player collects hearts
+  heartDrops=heartDrops.filter(h=>{
+    if(player&&h.x+h.r>player.x&&h.x<player.x+player.w&&h.y+h.r>player.y&&h.y<player.y+player.h){
+      lives=Math.min(5,lives+1);updateHUD();sfxBubbleActivate();achOnHeart();STATS.totalHeartsCollected++;
+      floatTexts.push({x:h.x,y:h.y,vy:-2,al:1.5,txt:'♥ +1',col:'#ff2244'});
+      return false;
+    }
+    return true;
+  });
+
+  // Floating score texts
+  for(const f of floatTexts){f.y+=f.vy*dt;f.al-=0.025*dt;}
+  floatTexts=floatTexts.filter(f=>f.al>0);
 
   draw();
   animId=requestAnimationFrame(loop);
@@ -1167,36 +3018,70 @@ function loop(){
 // ═══════════════════════════════════════════════════
 function hitEnemy(i,dmg,hx,hy){
   const e=enemies[i];burst(hx,hy,e.col,5);e.hp-=dmg;
-  if(e.hp<=0){burst(e.x+e.w/2,e.y+e.h/2,e.col,18);score+=10*curLevel;updateHUD();sfxExplode(false);enemies.splice(i,1);}
+  if(e.hp<=0){
+    const pts=10*curLevel;
+    burst(e.x+e.w/2,e.y+e.h/2,e.col,18);
+    if(!anyCheatsOn()){score+=pts;updateHUD();achOnScore(score);}
+    STATS.totalKills++;STATS.totalDamageDealt+=pts;
+    const _tkn=['basic','armor','speedy','tank','bomber','ghost'];
+    if(e.ti!==undefined&&_tkn[e.ti])STATS.killsByType[_tkn[e.ti]]++;
+    achOnKill();
+    sfxExplode(false);
+    // Floating score text (show CHEAT if scoring disabled)
+    floatTexts.push({x:e.x+e.w/2,y:e.y,vy:-1.2,al:1,
+      txt:anyCheatsOn()?'CHEAT':'+'+pts,
+      col:anyCheatsOn()?'#ff4444':'#ffd166'});
+    // Rare heart drop ~3%
+    if(lives<5&&Math.random()<0.03){
+      heartDrops.push({x:e.x+e.w/2-6,y:e.y,vy:1.5,r:12});
+    }
+    enemies.splice(i,1);
+  }
 }
 function hitBoss(dmg,hx,hy){
-  burst(hx,hy,'#ff6b35',6);boss.hp-=dmg;boss.shk=6;
+  const d=CHEATS.megaDmg?300:dmg;
+  burst(hx,hy,'#ff6b35',6);boss.hp-=d;boss.shk=6;
   if(boss.hp<=0)bossDefeated();
 }
 function laserDmg(cx){
   // 1hp per frame (constant damage beam)
   for(let i=enemies.length-1;i>=0;i--){
     const e=enemies[i];if(cx>e.x&&cx<e.x+e.w){burst(cx,e.y+e.h/2,e.col,1);e.hp-=1;
-      if(e.hp<=0){burst(e.x+e.w/2,e.y+e.h/2,e.col,14);score+=10*curLevel;updateHUD();sfxExplode(false);enemies.splice(i,1);}
+      if(e.hp<=0){
+        const pts=10*curLevel;
+        burst(e.x+e.w/2,e.y+e.h/2,e.col,14);
+        if(!anyCheatsOn()){score+=pts;updateHUD();achOnScore(score);}
+        STATS.totalKills++;STATS.totalLaserKills++;STATS.totalDamageDealt+=10*curLevel;
+        const _tN=['basic','armor','speedy','tank','bomber','ghost'];
+        if(e.ti!==undefined&&_tN[e.ti])STATS.killsByType[_tN[e.ti]]++;
+        achOnKill();achOnLaserKill();
+        sfxExplode(false);
+        floatTexts.push({x:e.x+e.w/2,y:e.y,vy:-1.2,al:1,
+          txt:anyCheatsOn()?'CHEAT':'+'+pts,
+          col:anyCheatsOn()?'#ff4444':'#ffd166'});
+        if(lives<5&&Math.random()<0.03)heartDrops.push({x:e.x+e.w/2-6,y:e.y,vy:1.5,r:12});
+        enemies.splice(i,1);
+      }
     }
   }
-  if(boss&&cx>boss.x&&cx<boss.x+boss.w){burst(cx,boss.y+boss.h/2,'#ff6b35',2);boss.hp-=1;boss.shk=1;if(boss.hp<=0)bossDefeated();}
+  if(boss&&cx>boss.x&&cx<boss.x+boss.w){const _ld=CHEATS.megaDmg?300:1;burst(cx,boss.y+boss.h/2,'#ff6b35',2);boss.hp-=_ld;boss.shk=1;if(boss.hp<=0)bossDefeated();}
 }
 
 function bossDefeated(){
   if(!boss)return; // guard against double-call
   const bx=boss.x,by=boss.y,bw=boss.w,bh=boss.h;
-  const bonus=Math.floor(500+curLevel*200);score+=bonus;updateHUD();
+  const bonus=Math.floor(500+curLevel*200);if(!anyCheatsOn()){score+=bonus;updateHUD();achOnScore(score);}
   burst(bx+bw/2,by+bh/2,'#ff6b35',55);burst(bx+bw/2,by+bh/2,'#ffd166',40);
   // Kill boss completely before anything else
+  achOnBossDefeated(getTierIdx());STATS.totalBossesDefeated++;
   boss=null;bossUp=false;bossOut=true;bLaserOn=false;
   if(bossCountdownTO){clearTimeout(bossCountdownTO);bossCountdownTO=null;}
   stopBGM();sfxBossWin();
   // Stop the game loop
   running=false;cancelAnimationFrame(animId);
-  const nextLvl=Math.min(30,curLevel+1);
+  const nextLvl=Math.min(MAX_LEVEL,curLevel+1);
   unlock(nextLvl);
-  const isLast=(curLevel>=30);
+  const isLast=(curLevel>=MAX_LEVEL);
   showMsg(isLast?'** VICTORY! **':'BOSS SLAIN!\n+'+bonus+' PTS',2200);
   setTimeout(()=>showLevelComplete(isLast),2400);
 }
@@ -1206,8 +3091,11 @@ function levelComplete(){
   if(bossOut)return; // guard
   bossOut=true;
   running=false;cancelAnimationFrame(animId);stopBGM();sfxLevelUp();
-  const nextLvl=Math.min(30,curLevel+1);unlock(nextLvl);
-  setTimeout(()=>showLevelComplete(curLevel>=30),800);
+  const nextLvl=Math.min(MAX_LEVEL,curLevel+1);unlock(nextLvl);achOnLevelComplete(curLevel);achOnWaveComplete();
+  STATS.totalLevelsCompleted++;STATS.highestLevel=Math.max(STATS.highestLevel,curLevel);
+  if(!anyCheatsOn())STATS.highestScore=Math.max(STATS.highestScore,score);
+  STATS.totalWavesCleared++;saveStats();
+  setTimeout(()=>showLevelComplete(curLevel>=MAX_LEVEL),800);
 }
 
 function showLevelComplete(isVictory){
@@ -1224,7 +3112,7 @@ function showLevelComplete(isVictory){
   if(isVictory){
     titleEl.textContent='** YOU WIN! **';
     titleEl.style.color='#ffd166';
-    subEl.textContent='All 30 levels conquered!';
+    subEl.textContent='All 150 levels conquered!';
     contBtn.textContent='▶ PLAY AGAIN';
     contBtn.onclick=()=>{modal.classList.remove('show');beginLevel(1);};
   } else {
@@ -1248,7 +3136,8 @@ function qualifiesTop10(){
   if(highScores.length<10)return true;
   return score>highScores[highScores.length-1].score;
 }
-function doGameOver(){
+function doGameOver(){achOnDeath();STATS.totalDeaths++;saveStats();
+  score=levelStartScore; // reset score to what it was at level start
   running=false;cancelAnimationFrame(animId);
   if(bossCountdownTO){clearTimeout(bossCountdownTO);bossCountdownTO=null;}
   bLaserOn=false;hideMsg();sfxGameOver();
@@ -1288,14 +3177,165 @@ function hideMsg(){const el=document.getElementById('overlay-msg');el.style.disp
 //  PLAY BUTTON
 // ═══════════════════════════════════════════════════
 // Main menu button wiring
-document.getElementById('mm-play').addEventListener('click',()=>{beginLevel(curLevel);});
-document.getElementById('mm-levels').addEventListener('click',()=>{buildLvlGrid();document.getElementById('levels-modal').classList.add('show');});
-document.getElementById('mm-scores').addEventListener('click',()=>{
+document.getElementById('mm-play').addEventListener('click',()=>{sfxMenuClick();stopMMMusic();beginLevel(curLevel);});
+document.getElementById('mm-levels').addEventListener('click',()=>{sfxMenuClick();document.getElementById('mm-levels').classList.add('pressed');lvlPage=Math.floor((curLevel-1)/30);buildLvlGrid();document.getElementById('levels-modal').classList.add('show');});
+document.getElementById('mm-achievements').addEventListener('click',()=>{sfxMenuClick();
+  buildAchGrid();
+  document.getElementById('achievements-screen').style.display='flex';
+  document.getElementById('main-menu').classList.add('hidden');
+});
+document.getElementById('scores-back-ach').addEventListener('click',()=>{
+  document.getElementById('achievements-screen').style.display='none';
+  document.getElementById('main-menu').classList.remove('hidden');
+});
+document.getElementById('mm-scores').addEventListener('click',()=>{sfxMenuClick();
   document.getElementById('scores-screen').style.display='flex';
 });
 document.getElementById('scores-back').addEventListener('click',()=>{
   document.getElementById('scores-screen').style.display='none';
 });
+
+// ── SETTINGS WIRING ─────────────────────────────────────────
+document.getElementById('mm-settings').addEventListener('click',()=>{sfxMenuClick();
+  document.getElementById('settings-screen').style.display='flex';
+});
+document.getElementById('settings-back').addEventListener('click',()=>{sfxMenuBack();
+  document.getElementById('settings-screen').style.display='none';
+  if(!running)setTimeout(startMMMusic,100);
+});
+const volSlider=document.getElementById('vol-slider');
+volSlider.addEventListener('input',()=>{
+  const v=parseInt(volSlider.value);
+  document.getElementById('vol-val').textContent=v;
+  if(!audioMuted)setVolume(v);
+  else audioVol=v/100;
+});
+document.getElementById('mute-btn').addEventListener('click',()=>setMute(!audioMuted));
+
+// ── CHEAT CODE WIRING ────────────────────────────────────────
+const CHEAT_CODE='5529';
+let cheatScreenOpen=false;
+let cheatEntry='';
+
+// Opens cheat screen FROM settings — hides settings first
+document.getElementById('set-cheats-btn').addEventListener('click',()=>{
+  document.getElementById('settings-screen').style.display='none';
+  openCheatScreen();
+});
+
+function openCheatScreen(){
+  cheatScreenOpen=true;
+  cheatEntry='';
+  const scr=document.getElementById('cheat-screen');
+  scr.style.display='flex';
+  if(cheatUnlocked){
+    document.getElementById('cheat-options').style.display='flex';
+    document.getElementById('cheat-warn').style.display=anyCheatsOn()?'block':'none';
+    document.getElementById('cheat-lock-msg').style.display='none';
+    document.getElementById('cheat-input-display').style.display='none';
+    if(window._cheatPad)window._cheatPad.style.display='none';
+  } else {
+    document.getElementById('cheat-options').style.display='none';
+    document.getElementById('cheat-warn').style.display='none';
+    document.getElementById('cheat-lock-msg').style.display='block';
+    document.getElementById('cheat-input-display').style.display='block';
+    if(window._cheatPad)window._cheatPad.style.display='grid';
+    updateCheatDisplay('');
+  }
+}
+
+// Cheat back → return to settings
+document.getElementById('cheat-back').addEventListener('click',()=>{
+  cheatScreenOpen=false;
+  document.getElementById('cheat-screen').style.display='none';
+  document.getElementById('settings-screen').style.display='flex';
+});
+
+function updateCheatDisplay(str){
+  const disp=document.getElementById('cheat-input-display');
+  const pad=str.padEnd(4,'_');
+  disp.textContent=pad.split('').join(' ');
+}
+
+// Keyboard digit entry on cheat screen
+document.addEventListener('keydown',ev=>{
+  if(!cheatScreenOpen||cheatUnlocked)return;
+  if('0123456789'.includes(ev.key)){
+    cheatEntry=(cheatEntry+ev.key).slice(-4);
+    updateCheatDisplay(cheatEntry);
+    if(cheatEntry===CHEAT_CODE){
+      cheatUnlocked=true;
+      cheatEntry='';
+      const disp=document.getElementById('cheat-input-display');
+      disp.style.color='#00ff88';
+      disp.textContent='✓ UNLOCKED';
+      setTimeout(()=>{
+        document.getElementById('cheat-options').style.display='flex';
+        document.getElementById('cheat-lock-msg').style.display='none';
+        disp.style.display='none';
+      },600);
+      sfxBossWin&&sfxBossWin();
+    }
+  } else if(ev.code==='Backspace'){
+    cheatEntry=cheatEntry.slice(0,-1);
+    updateCheatDisplay(cheatEntry);
+  }
+});
+
+// On-screen digit pad for mobile (inject buttons into cheat screen)
+(function buildCheatPad(){
+  const scr=document.getElementById('cheat-screen');
+  const pad=document.createElement('div');
+  pad.id='cheat-pad';
+  pad.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(220px,80vw);margin-top:4px;';
+  [1,2,3,4,5,6,7,8,9,'←',0,''].forEach(k=>{
+    const btn=document.createElement('button');
+    btn.textContent=k===''?'':String(k);
+    btn.style.cssText="padding:10px 0;font-family:'Press Start 2P',monospace;font-size:0.55rem;background:#111;border:2px solid #333;color:"+(k==='←'?'#ff6600':'#ffd166')+";cursor:pointer;";
+    if(k==='')btn.style.visibility='hidden';
+    btn.addEventListener('click',()=>{
+      if(!cheatScreenOpen||cheatUnlocked)return;
+      if(k==='←'){cheatEntry=cheatEntry.slice(0,-1);}
+      else if(k!==''){cheatEntry=(cheatEntry+String(k)).slice(-4);}
+      updateCheatDisplay(cheatEntry);
+      if(cheatEntry===CHEAT_CODE){
+        cheatUnlocked=true;cheatEntry='';
+        const disp=document.getElementById('cheat-input-display');
+        disp.style.color='#00ff88';disp.textContent='✓ UNLOCKED';
+        setTimeout(()=>{
+          document.getElementById('cheat-options').style.display='flex';
+          document.getElementById('cheat-lock-msg').style.display='none';
+          disp.style.display='none';
+          pad.style.display='none';
+        },600);
+        sfxBossWin&&sfxBossWin();
+      }
+    });
+    pad.appendChild(btn);
+  });
+  // Insert pad before back button
+  const backBtn=document.getElementById('cheat-back');
+  scr.insertBefore(pad,backBtn);
+  // Hide pad when unlocked
+  const _origOpen=openCheatScreen;
+  // patch openCheatScreen to also toggle pad visibility
+  window._cheatPad=pad;
+})();
+
+// _cheatPad visibility is handled inside openCheatScreen via window._cheatPad set above
+
+// Cheat toggle buttons
+function toggleCheat(id,key){
+  CHEATS[key]=!CHEATS[key];
+  if(CHEATS[key])achOnCheat();
+  document.getElementById(id).classList.toggle('on',CHEATS[key]);
+  document.getElementById('cheat-warn').style.display=anyCheatsOn()?'block':'none';
+  if(key==='unlockAll'&&CHEATS.unlockAll)applyCheatUnlockAll();
+}
+document.getElementById('cheat-unlockall').addEventListener('click',()=>toggleCheat('cheat-unlockall','unlockAll'));
+document.getElementById('cheat-infhealth').addEventListener('click',()=>toggleCheat('cheat-infhealth','infHealth'));
+document.getElementById('cheat-infpower').addEventListener('click',()=>toggleCheat('cheat-infpower','infPower'));
+document.getElementById('cheat-megadmg').addEventListener('click',()=>toggleCheat('cheat-megadmg','megaDmg'));
 // Difficulty buttons in main menu
 // Difficulty button wiring — single source of truth
 function setDiff(d){
@@ -1307,7 +3347,8 @@ function setDiff(d){
     dv.style.color=d==='easy'?'#06d6a0':d==='hard'?'#ff4444':'#ff9f1c';
   }
 }
-document.querySelectorAll('.mm-diff-btn').forEach(b=>{
+// Wire difficulty buttons (now inside settings screen only)
+document.querySelectorAll('#set-diff .mm-diff-btn').forEach(b=>{
   b.addEventListener('click',()=>setDiff(b.dataset.d));
 });
 setDiff('easy'); // ensure initial state is consistent
@@ -2229,15 +4270,56 @@ function draw(){
     ctx.fillStyle='#ffff00';ctx.fillRect(b.x-4,b.y-10,8,13);
     ctx.fillStyle='#ffffff';ctx.fillRect(b.x-2,b.y-10,4,5);
   }
-  // Bullets — enemy
+  // Bullets — enemy (telegraph bullets pulse orange/transparent)
   for(const b of eBullets){
-    ctx.fillStyle=b.col;
-    ctx.fillRect(b.x-4,b.y,8,4);ctx.fillRect(b.x-2,b.y-4,4,4);ctx.fillRect(b.x-2,b.y+4,4,4);
-    ctx.fillStyle='#ffffff';ctx.fillRect(b.x-1,b.y,2,2);
+    if(b._tT!==undefined&&b._tT>0){
+      // Still in warning phase — draw as pulsing outline, not solid
+      const pulse=0.4+0.5*Math.sin(Date.now()*0.015);
+      ctx.globalAlpha=pulse;
+      ctx.fillStyle='#ffaa00';
+      ctx.fillRect(b.x-b.r,b.y-b.r,b.r*2,b.r*2);
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#ffffff';ctx.fillRect(b.x-2,b.y-2,4,4);
+    } else {
+      ctx.fillStyle=b.col;
+      ctx.fillRect(b.x-4,b.y,8,4);ctx.fillRect(b.x-2,b.y-4,4,4);ctx.fillRect(b.x-2,b.y+4,4,4);
+      ctx.fillStyle='#ffffff';ctx.fillRect(b.x-1,b.y,2,2);
+    }
   }
   // Particles
   for(const p of particles){ctx.globalAlpha=p.al;ctx.fillStyle=p.col;const s=Math.max(2,p.r|0);ctx.fillRect(Math.round(p.x),Math.round(p.y),s,s);}
   ctx.globalAlpha=1;
+
+  // Heart drops (pixel heart shape)
+  for(const h of heartDrops){
+    const hx=Math.floor(h.x),hy=Math.floor(h.y);
+    // Pulsing glow
+    ctx.globalAlpha=0.22+0.12*Math.sin(Date.now()*0.008);
+    ctx.fillStyle='#ff2244';ctx.fillRect(hx-9,hy-9,18,18);
+    ctx.globalAlpha=1;
+    // Pixel heart
+    ctx.fillStyle='#ff2244';
+    ctx.fillRect(hx-5,hy-6,4,4);ctx.fillRect(hx+1,hy-6,4,4);
+    ctx.fillRect(hx-7,hy-2,14,6);
+    ctx.fillRect(hx-5,hy+4,10,4);
+    ctx.fillRect(hx-3,hy+8,6,3);
+    ctx.fillRect(hx-1,hy+11,2,2);
+    ctx.fillStyle='#ff88aa';
+    ctx.fillRect(hx-4,hy-5,2,2);ctx.fillRect(hx+2,hy-5,2,2);
+  }
+  ctx.globalAlpha=1;
+
+  // Floating score texts
+  for(const f of floatTexts){
+    ctx.save();
+    ctx.globalAlpha=Math.min(1,f.al);
+    ctx.font="bold 10px 'Press Start 2P',monospace";
+    ctx.textAlign='center';
+    ctx.fillStyle='#000';ctx.fillText(f.txt,Math.floor(f.x)+1,Math.floor(f.y)+1);
+    ctx.fillStyle=f.col;ctx.fillText(f.txt,Math.floor(f.x),Math.floor(f.y));
+    ctx.restore();
+  }
+
   // Ground dashes
   ctx.fillStyle='rgba(100,80,180,0.32)';for(let gx=0;gx<GW;gx+=12)ctx.fillRect(gx,GH-6,8,3);
   // Laser screen tint
@@ -2260,7 +4342,7 @@ function draw(){
   ctx.fillText('30 LEVELS  6 ENEMY TYPES  6 BOSSES',GW/2,GH/2+14);
   ctx.fillText('LASER  BUBBLE SHIELD  DIFFICULTY SELECT',GW/2,GH/2+34);
   ctx.font="7px 'Press Start 2P',monospace";ctx.fillStyle='#445566';
-  ctx.fillText('MOVE:A/D  FIRE:Space  LASER:X  SHIELD:B  PAUSE:P',GW/2,GH/2+62);
+  ctx.fillText('MOVE:A/D  FIRE:Space  LASER:X  SHIELD:E  PAUSE:P',GW/2,GH/2+62);
 })();
 
 resizeCanvas();
@@ -2298,6 +4380,44 @@ function drawArrowLeft(cv){
   }));
 }
 
+function drawArrowUp(cv){
+  const c=cv.getContext('2d'),s=cv.width;
+  c.fillStyle='#0b0b1e';c.fillRect(0,0,s,s);
+  const G=[
+    [0,0,0,0,1,0,0,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,1,1,1,1,1,0,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [1,1,1,1,1,1,1,1,1,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+  ];
+  const bw=Math.floor(s/11),bh=Math.floor(s/9);
+  const ox=Math.floor((s-bw*10)/2),oy=Math.floor((s-bh*8)/2);
+  G.forEach((row,r)=>row.forEach((p,pc)=>{
+    if(p){c.fillStyle=r<2?'#ccaaff':r>6?'#7755bb':'#a78bfa';c.fillRect(ox+pc*bw,oy+r*bh,bw,bh);}
+  }));
+}
+function drawArrowDown(cv){
+  const c=cv.getContext('2d'),s=cv.width;
+  c.fillStyle='#0b0b1e';c.fillRect(0,0,s,s);
+  const G=[
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [1,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,0,1,1,1,1,1,0,0,0],
+    [0,0,0,1,1,1,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0],
+  ];
+  const bw=Math.floor(s/11),bh=Math.floor(s/9);
+  const ox=Math.floor((s-bw*10)/2),oy=Math.floor((s-bh*8)/2);
+  G.forEach((row,r)=>row.forEach((p,pc)=>{
+    if(p){c.fillStyle=r>6?'#ccaaff':r<1?'#7755bb':'#a78bfa';c.fillRect(ox+pc*bw,oy+r*bh,bw,bh);}
+  }));
+}
 function drawArrowRight(cv){
   const c=cv.getContext('2d'),s=cv.width;
   c.fillStyle='#0b0b1e';c.fillRect(0,0,s,s);
@@ -2454,6 +4574,9 @@ function generateAppIcon(){
   const lnk=document.querySelector("link[rel='icon']")||document.createElement('link');
   lnk.rel='icon';lnk.href=ic.toDataURL();
   if(!lnk.parentNode)document.head.appendChild(lnk);
+  // Also set apple-touch-icon
+  const ati=document.getElementById('ati-link');
+  if(ati)ati.href=ic.toDataURL();
 }
 
 function wireCanvasBtn(id,prop,cb){
@@ -2469,6 +4592,8 @@ function wireCanvasBtn(id,prop,cb){
 setTimeout(()=>{
   const cvL=document.getElementById('cb-left');   if(cvL)drawArrowLeft(cvL);
   const cvR=document.getElementById('cb-right');  if(cvR)drawArrowRight(cvR);
+  const cvU=document.getElementById('cb-up');     if(cvU)drawArrowUp(cvU);
+  const cvDn=document.getElementById('cb-down');  if(cvDn)drawArrowDown(cvDn);
   const cvF=document.getElementById('cb-fire');   if(cvF)drawFireBtn(cvF);
   const cvLa=document.getElementById('cb-laser'); if(cvLa)drawLaserBtn(cvLa);
   const cvSh=document.getElementById('cb-shield');if(cvSh)drawShieldBtn(cvSh);
@@ -2476,6 +4601,8 @@ setTimeout(()=>{
   try{generateAppIcon();}catch(e){}
   wireCanvasBtn('cb-left','left');
   wireCanvasBtn('cb-right','right');
+  wireCanvasBtn('cb-up','up');
+  wireCanvasBtn('cb-down','down');
   wireCanvasBtn('cb-fire','fire',()=>{if(running&&!paused)doShoot();});
   wireCanvasBtn('cb-laser','laser',()=>{if(running&&!paused)doLaser();});
   wireCanvasBtn('cb-shield','shield',()=>{if(running&&!paused)doBubble();});
@@ -2514,6 +4641,38 @@ setTimeout(()=>{
       r:Math.random()*1.8+0.3,spd:Math.random()*0.4+0.05,
       br:Math.random(),phase:Math.random()*Math.PI*2,
     }));
+    // ── Menu ship + enemies sim ──
+    const mmShip={x:mmBg.width*.5,y:mmBg.height*.75,vx:1.2,vy:0};
+    const mmEnemies=Array.from({length:12},(_,i)=>({
+      x:80+Math.random()*(mmBg.width-160),y:30+Math.random()*(mmBg.height*.45),
+      vx:(Math.random()-.5)*1.2,vy:Math.random()*.3+.1,
+      w:28,h:22,col:['#06d6a0','#ff9f1c','#ef476f','#a78bfa','#00ddff'][i%5],
+      hp:3,
+    }));
+    const mmBullets=[];
+    const mmExplosions=[];
+    let mmShootCD=0;
+
+    function drawPixelShip(ctx,x,y,scale){
+      const s=scale||1;
+      ctx.fillStyle='#aaddff';
+      ctx.fillRect(x-2*s,y,4*s,8*s);
+      ctx.fillRect(x-8*s,y+5*s,16*s,5*s);
+      ctx.fillRect(x-14*s,y+8*s,28*s,4*s);
+      ctx.fillStyle='#ff6b35';
+      ctx.fillRect(x-6*s,y+10*s,4*s,5*s);
+      ctx.fillRect(x+2*s,y+10*s,4*s,5*s);
+      ctx.fillStyle='#fff';
+      ctx.fillRect(x-1*s,y+1*s,2*s,3*s);
+    }
+    function drawPixelEnemy(ctx,x,y,col){
+      ctx.fillStyle=col;
+      ctx.fillRect(x-10,y,20,14);
+      ctx.fillRect(x-14,y+5,28,6);
+      ctx.fillStyle='#ff2244';
+      ctx.fillRect(x-4,y+9,4,4);ctx.fillRect(x,y+9,4,4);
+    }
+
     let mmT=0;
     function animMenuBg(){
       if(!document.getElementById('main-menu').classList.contains('hidden')){
@@ -2540,6 +4699,75 @@ setTimeout(()=>{
           }
         }
         bc.globalAlpha=1;
+
+        // ── Ship + enemies ──
+        if(mmT%2===0){ // update every other frame
+          // Move ship
+          mmShip.x+=mmShip.vx;
+          if(mmShip.x<60||mmShip.x>bw-60)mmShip.vx*=-1;
+          // Move enemies
+          for(const e of mmEnemies){
+            e.x+=e.vx;e.y+=e.vy;
+            if(e.x<20||e.x>bw-20){e.vx*=-1;}
+            if(e.y>bh*.55){e.vy=-(Math.random()*.3+.1);e.y=bh*.55;}
+            if(e.y<20){e.vy=Math.random()*.3+.1;}
+          }
+          // Ship auto-fires at nearest enemy
+          mmShootCD--;
+          if(mmShootCD<=0&&mmEnemies.length>0){
+            mmShootCD=18;
+            let nearest=null,nd=9999;
+            for(const e of mmEnemies){const d=Math.abs(e.x-mmShip.x);if(d<nd){nd=d;nearest=e;}}
+            if(nearest)mmBullets.push({x:mmShip.x,y:mmShip.y-8,vx:(nearest.x-mmShip.x)*.04,vy:-5,target:nearest});
+          }
+          // Move bullets
+          for(const b of mmBullets){b.x+=b.vx;b.y+=b.vy;}
+          // Bullet hits
+          for(let bi=mmBullets.length-1;bi>=0;bi--){
+            const b=mmBullets[bi];
+            for(let ei=mmEnemies.length-1;ei>=0;ei--){
+              const e=mmEnemies[ei];
+              if(Math.abs(b.x-e.x)<14&&Math.abs(b.y-e.y)<12){
+                mmBullets.splice(bi,1);e.hp--;
+                if(e.hp<=0){
+                  mmExplosions.push({x:e.x,y:e.y,t:20,col:e.col});
+                  mmEnemies.splice(ei,1);
+                  // Respawn
+                  setTimeout(()=>mmEnemies.push({
+                    x:20+Math.random()*(bw-40),y:20+Math.random()*(bh*.4),
+                    vx:(Math.random()-.5)*1.2,vy:Math.random()*.3+.1,
+                    w:28,h:22,col:['#06d6a0','#ff9f1c','#ef476f','#a78bfa','#00ddff'][Math.floor(Math.random()*5)],
+                    hp:3,
+                  }),1200+Math.random()*1500);
+                }
+                break;
+              }
+            }
+          }
+          // Clean up
+          for(let i=mmExplosions.length-1;i>=0;i--){mmExplosions[i].t--;if(mmExplosions[i].t<=0)mmExplosions.splice(i,1);}
+          mmBullets.splice(0,mmBullets.length,...mmBullets.filter(b=>b.y>-20&&b.y<bh+20&&b.x>0&&b.x<bw));
+        }
+
+        // Draw enemies
+        bc.globalAlpha=0.55;
+        for(const e of mmEnemies)drawPixelEnemy(bc,e.x,e.y,e.col);
+        // Draw bullets
+        bc.globalAlpha=0.75;bc.fillStyle='#00ffcc';
+        for(const b of mmBullets)bc.fillRect(b.x-2,b.y-5,4,10);
+        // Draw explosions
+        for(const ex of mmExplosions){
+          const p=ex.t/20;
+          bc.globalAlpha=p*0.6;bc.fillStyle=ex.col;
+          bc.fillRect(ex.x-12*p,ex.y-10*p,24*p,20*p);
+          bc.globalAlpha=p*0.4;bc.fillStyle='#ffffff';
+          bc.fillRect(ex.x-6*p,ex.y-5*p,12*p,10*p);
+        }
+        // Draw ship
+        bc.globalAlpha=0.7;
+        drawPixelShip(bc,mmShip.x,mmShip.y,1.5);
+        bc.globalAlpha=1;
+
         mmT++;
       }
       requestAnimationFrame(animMenuBg);
@@ -2547,7 +4775,52 @@ setTimeout(()=>{
     function resizeMenuBg(){mmBg.width=window.innerWidth;mmBg.height=window.innerHeight;}
   window.addEventListener('resize',resizeMenuBg);resizeMenuBg();
     animMenuBg();
+    // Start main menu music after brief delay
+    setTimeout(startMMMusic,200);
   }
+
+  // Wire stats button
+  document.getElementById('set-stats-btn').addEventListener('click',()=>{
+    sfxMenuClick();buildStatsGrid();
+    document.getElementById('stats-screen').style.display='flex';
+    document.getElementById('settings-screen').style.display='none';
+  });
+  document.getElementById('stats-back').addEventListener('click',()=>{
+    sfxMenuBack();
+    document.getElementById('stats-screen').style.display='none';
+    document.getElementById('settings-screen').style.display='flex';
+  });
+
+  // Wire reset button
+  document.getElementById('set-reset-btn').addEventListener('click',()=>{
+    sfxMenuClick();
+    document.getElementById('reset-confirm-overlay').style.display='flex';
+  });
+  document.getElementById('reset-cancel-btn').addEventListener('click',()=>{
+    sfxMenuBack();
+    document.getElementById('reset-confirm-overlay').style.display='none';
+    document.getElementById('reset-step1').style.display='flex';
+    document.getElementById('reset-step2').style.display='none';
+  });
+  document.getElementById('reset-cancel-btn2').addEventListener('click',()=>{
+    sfxMenuBack();
+    document.getElementById('reset-confirm-overlay').style.display='none';
+    document.getElementById('reset-step1').style.display='flex';
+    document.getElementById('reset-step2').style.display='none';
+  });
+  document.getElementById('reset-confirm-btn').addEventListener('click',()=>{
+    sfxMenuClick();
+    // Show step 2 confirmation
+    document.getElementById('reset-step1').style.display='none';
+    document.getElementById('reset-step2').style.display='flex';
+  });
+  document.getElementById('reset-confirm-btn2').addEventListener('click',()=>{
+    doResetProgress();
+  });
+
+  // Stop MM music when starting game, restart when returning to menu
+  const _origBegin=window._beginLvl;
+
 },100);
 
 </script>
